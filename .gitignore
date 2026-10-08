@@ -1,0 +1,46 @@
+# 编译产物
+target/
+*.class
+*.jar
+*.war
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+
+# 日志
+*.log
+logs/
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# 【关键】真实配置永不提交
+application-dev.yml
+application-local.yml
+application-prod.yml
+*-secret.yml
+
+# 但模板要提交
+!application-dev.yml.example
+
+# 上传的临时文件
+/tmp/
+/upload/
+
+# 前端
+node_modules/
+dist/
+
+# IDEA 编译输出目录
+out/
+
+# Maven Wrapper 下载缓存
+.mvn/wrapper/maven-wrapper.jar
