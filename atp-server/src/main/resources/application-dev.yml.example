@@ -1,0 +1,77 @@
+# 复制本文件为 application-dev.yml，再把下面的占位值换成真实值。
+# application-dev.yml 已被 .gitignore 挡住，永远不会被提交。
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/agent_ticket?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: your-db-username
+    password: your-db-password
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      validation-query: SELECT 1
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: your-redis-password
+      database: 10
+
+# JWT
+atp:
+  jwt:
+    admin-token-name: token
+    admin-secret-key: ${ATP_JWT_SECRET:please-change-this-to-a-32byte-random-string-000000}
+    admin-ttl: 7200000
+    admin-token-name-header: Authorization
+
+# LangChain4j（阶段 3 才用，先放这里）
+langchain4j:
+  open-ai:
+    chat-model:
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      api-key: ${QW-API-KEY}
+      model-name: qwen-plus
+      temperature: 0.3
+      log-requests: true
+      log-responses: true
+    streaming-chat-model:
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      api-key: ${QW-API-KEY}
+      model-name: qwen-plus
+      log-requests: true
+      log-responses: true
+    embedding-model:
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      api-key: ${QW-API-KEY}
+      model-name: text-embedding-v3
+      max-segments-per-batch: 20
+  community:
+    redis:
+      # 向量库阶段 5 才用。这个开关默认是 true，不显式关掉的话，
+      # 应用一启动就会去连 6380，连不上直接抛异常起不来。
+      enabled: false
+      host: localhost
+      port: 6380
+      password: your-redis-password
+      dimension: 1024
+
+# 外部系统（项目一）
+external:
+  sky-take-out:
+    base-url: http://localhost:8080
+    username: your-username
+    password: your-password
+
+# 业务配置
+atp.agent:
+  default-max-rounds: 6
+  default-max-tool-calls: 12
+  tool-default-timeout-ms: 5000
+  memory-window-size: 30
+  idempotent-ttl-hours: 24
+  approval-expire-hours: 24
+  daily-cost-limit: 5.00
