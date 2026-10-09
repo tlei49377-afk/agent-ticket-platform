@@ -13,17 +13,17 @@ public class Result<T> implements Serializable {
     private String msg; // 提示信息
     private T data; // 数据
 
-    // 成功，不传数据
-    public static <T> Result<T> success(T data) {
+    // 成功，不带数据
+    public static <T> Result<T> success() {
         Result<T> r = new Result<>();
         r.code = 1;
-        r.msg = "success"; // 默认成功消息
+        r.msg = "success";
         return r;
     }
 
-    // 成功，传数据
-    public  static  <T> Result<T> summess(T data) {
-        Result<T> r = new Result<>();
+    // 成功，带数据
+    public static <T> Result<T> success(T data) {
+        Result<T> r = success();
         r.data = data;
         return r;
     }

@@ -68,6 +68,12 @@
             <artifactId>jjwt</artifactId>
         </dependency>
 
+        <!-- BCrypt 校验密码，只引 crypto，不引整个 security starter -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>

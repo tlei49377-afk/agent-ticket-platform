@@ -6,10 +6,13 @@ import com.atp.common.exception.PermissionDeniedException;
 import com.atp.common.result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.sql.SQLIntegrityConstraintViolationException;
 
@@ -54,6 +57,16 @@ public class GlobalExceptionHandler {
     public Result<Void> handleDuplicate(Exception ex) {
         log.warn("唯一键冲突：{}", ex.getMessage());
         return Result.error("数据已存在或违反唯一约束");
+    }
+
+    /**
+     * 接口不存在
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Result<Void> handleNotFound(NoResourceFoundException ex) {
+        log.warn("接口不存在：{}", ex.getMessage());
+        return Result.error("接口不存在");
     }
 
     /**
