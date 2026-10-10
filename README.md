@@ -4,9 +4,9 @@
 
 ## 当前进度
 
-**阶段 0（需求与设计）已完成**，数据库已建好并灌入初始化数据，多模块骨架已跑通构建。
+**阶段 0（需求与设计）、阶段 1（后端骨架）已完成**：库建好并灌入了初始化数据，5 个模块能构建，Web 层已经能登录、鉴权、发统一响应、带 traceId，另有 Actuator 与 OpenAPI 两个口子。业务接口本身从阶段 2 开始写。
 
-业务代码尚未开始，阶段 1 会往各模块里填内容。完整操作步骤见 `..\docs\05-项目二操作流程手册.md`。
+完整操作步骤见 `..\docs\05-项目二操作流程手册.md`。
 
 | 已完成 | 内容 |
 |---|---|
@@ -15,6 +15,8 @@
 | 数据库 | `agent_ticket`，34 张表 |
 | 初始化数据 | 4 角色 / 13 权限 / 5 用户 / 7 分类 / 4 SLA 策略 / 15 工具 / 2 Agent / 100 条评测用例 |
 | Maven 骨架 | 父工程 + 5 个子模块，`mvn clean install` 通过 |
+| Web 基础设施 | 统一响应 `Result`、全局异常处理、JWT 登录与拦截器、`@RequirePermission` 权限切面（权限码缓存在 Redis） |
+| 可观测与调试 | traceId 贯穿日志与 `X-Trace-Id` 响应头；Actuator（`/actuator/health`、`/actuator/prometheus`）；OpenAPI（`/v3/api-docs`，导入 Apifox 用） |
 
 ## 模块结构
 
@@ -39,12 +41,27 @@ docs/design/    设计文档（PRD、工具清单、工单状态机、Agent 状�
 sql/            建库脚本与初始化数据
 ```
 
+## 接口约定
+
+所有接口都返回同一个形状，前端只写一套解析逻辑：
+
+| 场景 | HTTP 状态 | 响应体 |
+|---|---|---|
+| 成功 | 200 | `{"code":1,"msg":"success","data":...}` |
+| 业务失败（参数不对、状态不允许） | 200 | `{"code":0,"msg":"失败原因"}` |
+| 未登录 / token 失效 | 401 | 空（拦截器在进 Controller 之前就返回了） |
+| 登录了但缺权限 | 403 | `{"code":0,"msg":"你没有执行该操作的权限"}` |
+
+- 登录成功后的 token 放在请求头 `token` 里（不是 `Authorization`），除 `/login`、`/actuator/**`、`/v3/api-docs/**` 之外的接口都要带。
+- 每个请求的 traceId 会回写到响应头 `X-Trace-Id`，和日志里 `%X{traceId}` 打出来的是同一个值。排查问题时拿它去搜日志即可。
+
 ## 快速开始
 
 ### 1. 前置
 
 - JDK 21
 - MySQL 8（默认 `root` / `123456`，按自己的改动）
+- Redis 7+（权限码缓存用，默认 `localhost:6379`，库号 `10`）
 - Maven 3.9+
 
 ### 2. 构建
@@ -90,6 +107,32 @@ union all select '评测用例', count(*) from eval_case;
 
 预期：`34 / 4 / 13 / 5 / 7 / 4 / 15 / 2 / 100`。
 
+### 5. 启动
+
+先起 Redis（权限缓存在它上面），再起应用：
+
+```bash
+mvn -pl atp-server spring-boot:run "-Dmaven.repo.local=E:\Java\maven-LocalRepository"
+```
+
+IDEA 里直接跑 `AtpApplication` 也一样。看到 `Tomcat started on port 18096` 就是起来了。
+
+**冒烟三条**（阶段 1 还没有业务接口，验的是登录、鉴权和统一响应）：
+
+```bash
+# 1) 登录，拿 token
+curl -s -X POST http://localhost:18096/login -H "Content-Type: application/json" -d "{\"username\":\"admin\",\"password\":\"123456\"}"
+
+# 2) 不带 token 访问任意受保护路径 → 401
+curl -s -o NUL -w "%{http_code}" http://localhost:18096/ticket/page
+
+# 3) 带上 token 再访问 → 404（接口还没写），但响应体已经是统一 Result
+curl -s -H "token: <上一步拿到的 token>" http://localhost:18096/ticket/page
+```
+
+- `/actuator/health` 返回 `{"status":"UP"}`；`/actuator/prometheus` 能看到 JVM 指标。
+- `/v3/api-docs` 返回 OpenAPI 文档，Apifox 里用「通过 URL 导入」填这个地址。
+
 ## 默认账号
 
 密码统一 `123456`，库中存的是 BCrypt 哈希，不是明文。
@@ -105,14 +148,14 @@ union all select '评测用例', count(*) from eval_case;
 ## 配置文件
 
 真实的 `application-dev.yml` **不入库**（`.gitignore` 已挡住），仓库里只有 `.example` 模板。
-阶段 1 生成模板后，复制一份改名并填入真实值：
+复制一份改名，再照着注释填真实值：
 
 ```bash
 cp atp-server/src/main/resources/application-dev.yml.example \
    atp-server/src/main/resources/application-dev.yml
 ```
 
-模型 API Key 建议走环境变量 `QW-API-KEY`，不要写进配置文件。
+模型 API Key 走环境变量 `QW-API-KEY`，不要写进配置文件。**这个变量必须设**：配置里写的是 `${QW-API-KEY}` 占位符，没有默认值，不设的话应用起不来。
 
 ## IDEA 环境准备
 
