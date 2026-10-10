@@ -5,8 +5,6 @@ import com.atp.server.mapper.PermissionMapper;
 import com.atp.server.service.PermissionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -25,14 +23,11 @@ public class PermissionServiceImpl implements PermissionService {
     private PermissionMapper permissionMapper;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
-    @Qualifier("redisTemplate")
-    @Autowired
-    private RedisTemplate redisTemplate;
 
     @Override
     public List<String> listCodesByUserId(Long userId) {
         String key = CACHE_KEY_PREFIX + userId;
-        String json = redisTemplate.opsForValue().get(key).toString();
+        String json = stringRedisTemplate.opsForValue().get(key);
         if (json != null) {
             return JSON.parseArray(json, String.class);
         }
@@ -41,12 +36,12 @@ public class PermissionServiceImpl implements PermissionService {
         List<String> codes = permissionMapper.listCodesByUserId(userId);
 
         // 查不到也缓存空列表，防止缓存穿透
-        redisTemplate.opsForValue().set(key, JSON.toJSONString(codes), CACHE_TTL);
+        stringRedisTemplate.opsForValue().set(key, JSON.toJSONString(codes), CACHE_TTL);
         return codes;
     }
 
     @Override
     public void evictCache(Long userId) {
-        redisTemplate.delete(CACHE_KEY_PREFIX + userId);
+        stringRedisTemplate.delete(CACHE_KEY_PREFIX + userId);
     }
 }
