@@ -2,6 +2,7 @@ package com.atp.server.aspect;
 
 import com.atp.common.annotation.RequirePermission;
 import com.atp.common.constant.MessageConstant;
+import com.atp.common.exception.BaseException;
 import com.atp.common.exception.PermissionDeniedException;
 import com.atp.server.interceptor.JwtTokenInterceptor;
 import com.atp.server.service.PermissionService;
@@ -54,7 +55,8 @@ public class PermissionAspect {
         // 从 request 取身份，不从 ThreadLocal
         Object attr = request.getAttribute(JwtTokenInterceptor.ATTR_CALLER_ID);
         if (attr == null) {
-            throw new PermissionDeniedException(MessageConstant.NOT_LOGIN);
+            // 未登录不是"没权限"：保持 200 + code=0，前端靠这条文案跳登录页
+            throw new BaseException(MessageConstant.NOT_LOGIN);
         }
         Long userId = (Long) attr;
 

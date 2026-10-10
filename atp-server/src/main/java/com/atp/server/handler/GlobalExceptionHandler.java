@@ -35,6 +35,7 @@ public class GlobalExceptionHandler {
      * 权限不足
      */
     @ExceptionHandler(PermissionDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
     public Result<Void> handlePermission(PermissionDeniedException ex) {
         log.warn("权限不足：{}", ex.getMessage());
         return Result.error(ex.getMessage());
