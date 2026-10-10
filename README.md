@@ -117,20 +117,29 @@ mvn -pl atp-server spring-boot:run "-Dmaven.repo.local=E:\Java\maven-LocalReposi
 
 IDEA 里直接跑 `AtpApplication` 也一样。看到 `Tomcat started on port 18096` 就是起来了。
 
-**冒烟三条**（阶段 1 还没有业务接口，验的是登录、鉴权和统一响应）：
+**冒烟**（阶段 1 只有 `/login` 和 `/logout` 两个接口，所以先验登录、统一响应和健康检查）：
 
-```bash
-# 1) 登录，拿 token
-curl -s -X POST http://localhost:18096/login -H "Content-Type: application/json" -d "{\"username\":\"admin\",\"password\":\"123456\"}"
+```powershell
+$base = "http://127.0.0.1:18096"
 
-# 2) 不带 token 访问任意受保护路径 → 401
-curl -s -o NUL -w "%{http_code}" http://localhost:18096/ticket/page
+# 1) 登录拿 token
+$r = Invoke-RestMethod -Uri "$base/login" -Method Post -ContentType "application/json" `
+     -Body '{"username":"admin","password":"123456"}'
+$r | ConvertTo-Json -Depth 5
+#    预期 {"code":1,"msg":"success","data":{"id":1,"username":"admin","name":"系统管理员","token":"eyJ..."}}
 
-# 3) 带上 token 再访问 → 404（接口还没写），但响应体已经是统一 Result
-curl -s -H "token: <上一步拿到的 token>" http://localhost:18096/ticket/page
+# 2) 调一个还不存在的接口 → 404，响应体是统一 Result 而不是 HTML 错误页
+& curl.exe -s -i "$base/ticket/page"
+#    预期 {"code":0,"msg":"接口不存在"}，响应头里有 X-Trace-Id
+
+# 3) 健康检查
+& curl.exe -s "$base/actuator/health"
+#    预期 {"status":"UP"}
 ```
 
-- `/actuator/health` 返回 `{"status":"UP"}`；`/actuator/prometheus` 能看到 JVM 指标。
+⚠️ **401 / 403 用 `/ticket/page` 这种不存在的路径是验不出来的**：`JwtTokenInterceptor` 只对真正映射到 Controller 方法的请求校验 token，路径不存在时直接放行，最后掉进 404，看起来像"鉴权没生效"。阶段 1 想验这两条，得先临时加一个带 `@RequirePermission` 的接口 —— 操作手册 **1.8.6** 有现成的代码和四条预期结果。
+
+- `/actuator/prometheus` 能看到 JVM 指标。
 - `/v3/api-docs` 返回 OpenAPI 文档，Apifox 里用「通过 URL 导入」填这个地址。
 
 ## 默认账号
