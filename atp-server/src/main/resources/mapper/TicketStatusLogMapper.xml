@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atp.server.mapper.TicketStatusLogMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ticket_status_log (ticket_id, from_status, to_status, operator_id, reason)
+        VALUES (#{ticketId}, #{fromStatus}, #{toStatus}, #{operatorId}, #{reason})
+    </insert>
+
+    <select id="listByTicket" resultType="com.atp.pojo.vo.ticket.TicketStatusLogVO">
+        SELECT l.id, l.from_status, l.to_status, l.operator_id, l.reason, l.create_time,
+               u.name AS operator_name
+        FROM ticket_status_log l
+                 LEFT JOIN sys_user u ON u.id = l.operator_id
+        WHERE l.ticket_id = #{ticketId}
+        ORDER BY l.create_time ASC, l.id ASC
+    </select>
+</mapper>

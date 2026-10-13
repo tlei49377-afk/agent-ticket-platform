@@ -49,3 +49,12 @@ springdoc:
 logging:
   level:
     com.atp: debug
+
+# 附件与 SLA 巡检
+atp:
+  file:
+    upload-dir: ./data/uploads
+    url-prefix: /files
+  sla:
+    # 每 5 分钟巡检一次；调试时可以临时改成 */10 * * * * *
+    patrol-cron: "0 */5 * * * *"

@@ -44,3 +44,6 @@ out/
 
 # Maven Wrapper 下载缓存
 .mvn/wrapper/maven-wrapper.jar
+
+# 附件目录（运行时生成）
+data/

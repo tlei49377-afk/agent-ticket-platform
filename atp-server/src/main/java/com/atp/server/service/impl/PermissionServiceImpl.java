@@ -24,6 +24,11 @@ public class PermissionServiceImpl implements PermissionService {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
+    /**
+     * 先查缓存，没有再去库里查并回填
+     * @param userId
+     * @return
+     */
     @Override
     public List<String> listCodesByUserId(Long userId) {
         String key = CACHE_KEY_PREFIX + userId;
@@ -40,6 +45,10 @@ public class PermissionServiceImpl implements PermissionService {
         return codes;
     }
 
+    /**
+     * 清掉该用户的权限缓存，角色或权限变动后调用
+     * @param userId
+     */
     @Override
     public void evictCache(Long userId) {
         stringRedisTemplate.delete(CACHE_KEY_PREFIX + userId);

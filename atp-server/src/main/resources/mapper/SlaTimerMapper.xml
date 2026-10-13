@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atp.server.mapper.SlaTimerMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sla_timer (ticket_id, timer_type, deadline, state, escalated)
+        VALUES (#{ticketId}, #{timerType}, #{deadline}, #{state}, 0)
+    </insert>
+
+    <insert id="insertBatch">
+        INSERT INTO sla_timer (ticket_id, timer_type, deadline, state, escalated)
+        VALUES
+        <foreach collection="list" item="it" separator=",">
+            (#{it.ticketId}, #{it.timerType}, #{it.deadline}, #{it.state}, 0)
+        </foreach>
+    </insert>
+
+    <select id="listByTicket" resultType="com.atp.pojo.entity.ticket.SlaTimer">
+        SELECT id, ticket_id, timer_type, deadline, state, breached_at, escalated, create_time, update_time
+        FROM sla_timer
+        WHERE ticket_id = #{ticketId}
+        ORDER BY id ASC
+    </select>
+
+    <!-- 还没判超期的，巡检时刷新状态 -->
+    <select id="listNotBreached" resultType="com.atp.pojo.entity.ticket.SlaTimer">
+        SELECT id, ticket_id, timer_type, deadline, state, breached_at, escalated, create_time, update_time
+        FROM sla_timer
+        WHERE state != 'breached'
+        ORDER BY deadline ASC
+    </select>
+
+    <select id="listBreachedNotEscalated" resultType="com.atp.pojo.entity.ticket.SlaTimer">
+        SELECT id, ticket_id, timer_type, deadline, state, breached_at, escalated, create_time, update_time
+        FROM sla_timer
+        WHERE state = 'breached'
+          AND escalated = 0
+        ORDER BY breached_at ASC
+        LIMIT 200
+    </select>
+
+    <update id="updateState">
+        UPDATE sla_timer
+        SET state = #{state},
+            breached_at = #{breachedAt},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 幂等靠这条 UPDATE 抢锁：只有 affectedRows = 1 的那次才继续升级 -->
+    <update id="markEscalated">
+        UPDATE sla_timer
+        SET escalated = 1, update_time = NOW()
+        WHERE id = #{id}
+          AND escalated = 0
+    </update>
+</mapper>

@@ -29,6 +29,11 @@ public class SysUserServiceImpl implements SysUserService {
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    /**
+     * 校验用户名密码，通过后签发令牌并更新最后登录时间
+     * @param dto
+     * @return
+     */
     @Override
     public LoginVO login(LoginDTO dto) {
         SysUser user = sysUserMapper.selectByUsername(dto.getUsername());

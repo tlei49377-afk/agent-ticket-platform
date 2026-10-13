@@ -41,6 +41,10 @@ public class PermissionAspect {
     public void permissionPointCut() {
     }
 
+    /**
+     * 方法上标了 @RequirePermission 才校验，没标就直接放行
+     * @param joinPoint
+     */
     @Before("permissionPointCut()")
     public void checkPermission(JoinPoint joinPoint) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();

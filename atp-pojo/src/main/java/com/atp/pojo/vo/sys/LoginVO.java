@@ -9,8 +9,16 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class LoginVO {
-    private Long id; // 用户 ID
-    private String username; // 用户名
-    private String name; // 姓名
-    private String token; // 登录令牌
+
+    //用户 ID
+    private Long id;
+
+    //用户名
+    private String username;
+
+    //姓名
+    private String name;
+
+    //登录令牌，后续请求放在请求头里带回来
+    private String token;
 }

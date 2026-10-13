@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atp.server.mapper.TicketCategoryMapper">
+
+    <select id="listEnabled" resultType="com.atp.pojo.entity.ticket.TicketCategory">
+        SELECT id, parent_id, name, ancestors, sort, default_priority, status, create_time, update_time
+        FROM ticket_category
+        WHERE deleted = 0
+          AND status = 1
+        ORDER BY sort ASC, id ASC
+    </select>
+
+    <select id="getById" resultType="com.atp.pojo.entity.ticket.TicketCategory">
+        SELECT id, parent_id, name, ancestors, sort, default_priority, status, create_time, update_time
+        FROM ticket_category
+        WHERE id = #{id}
+          AND deleted = 0
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ticket_category (parent_id, name, ancestors, sort, default_priority, status)
+        VALUES (#{parentId}, #{name}, #{ancestors}, #{sort}, #{defaultPriority}, 1)
+    </insert>
+
+    <update id="deleteById">
+        UPDATE ticket_category
+        SET deleted = 1, update_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <!-- 删分类前问一句：下面还有没有没关闭的工单 -->
+    <select id="countOpenTickets" resultType="int">
+        SELECT COUNT(*)
+        FROM ticket
+        WHERE category_id = #{categoryId}
+          AND deleted = 0
+          AND status != 6
+    </select>
+</mapper>

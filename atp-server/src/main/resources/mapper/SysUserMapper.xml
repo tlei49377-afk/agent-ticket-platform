@@ -10,6 +10,20 @@
           AND deleted = 0
     </select>
 
+    <select id="getById" resultType="com.atp.pojo.entity.sys.SysUser">
+        SELECT id, username, password, name, phone, email, avatar, status, last_login_at, deleted
+        FROM sys_user
+        WHERE id = #{id}
+          AND deleted = 0
+    </select>
+
+    <select id="listRoleCodesByUserId" resultType="java.lang.String">
+        SELECT r.code
+        FROM sys_user_role ur
+                 JOIN sys_role r ON r.id = ur.role_id AND r.deleted = 0 AND r.status = 1
+        WHERE ur.user_id = #{userId}
+    </select>
+
     <update id="updateLastLoginAt">
         UPDATE sys_user
         SET last_login_at = NOW()

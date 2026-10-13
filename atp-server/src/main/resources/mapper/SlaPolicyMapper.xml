@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atp.server.mapper.SlaPolicyMapper">
+
+    <select id="list" resultType="com.atp.pojo.entity.ticket.SlaPolicy">
+        SELECT id, name, priority, respond_minutes, resolve_minutes, warn_percent,
+        escalate_role, enabled, create_time, update_time
+        FROM sla_policy
+        WHERE deleted = 0
+        ORDER BY priority ASC
+    </select>
+
+    <select id="getById" resultType="com.atp.pojo.entity.ticket.SlaPolicy">
+        SELECT id, name, priority, respond_minutes, resolve_minutes, warn_percent,
+        escalate_role, enabled, create_time, update_time
+        FROM sla_policy
+        WHERE id = #{id}
+          AND deleted = 0
+    </select>
+
+    <select id="getEnabledByPriority" resultType="com.atp.pojo.entity.ticket.SlaPolicy">
+        SELECT id, name, priority, respond_minutes, resolve_minutes, warn_percent,
+        escalate_role, enabled, create_time, update_time
+        FROM sla_policy
+        WHERE priority = #{priority}
+          AND enabled = 1
+          AND deleted = 0
+        LIMIT 1
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sla_policy (name, priority, respond_minutes, resolve_minutes, warn_percent, escalate_role, enabled)
+        VALUES (#{name}, #{priority}, #{respondMinutes}, #{resolveMinutes}, #{warnPercent}, #{escalateRole}, 1)
+    </insert>
+
+    <update id="update">
+        UPDATE sla_policy
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="priority != null">priority = #{priority},</if>
+            <if test="respondMinutes != null">respond_minutes = #{respondMinutes},</if>
+            <if test="resolveMinutes != null">resolve_minutes = #{resolveMinutes},</if>
+            <if test="warnPercent != null">warn_percent = #{warnPercent},</if>
+            <if test="escalateRole != null">escalate_role = #{escalateRole},</if>
+            <if test="enabled != null">enabled = #{enabled},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE sla_policy
+        SET deleted = 1, update_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+</mapper>

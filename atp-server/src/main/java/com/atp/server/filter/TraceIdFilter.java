@@ -26,6 +26,12 @@ public class TraceIdFilter extends OncePerRequestFilter {
     public static final String TRACE_ID = "traceId";
     public static final String HEADER = "X-Trace-Id";
 
+    /**
+     * 每个请求生成或沿用 traceId，写进 MDC 和响应头
+     * @param request
+     * @param response
+     * @param filterChain
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,

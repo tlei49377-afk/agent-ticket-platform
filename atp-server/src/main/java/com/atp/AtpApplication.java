@@ -10,8 +10,12 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication
 @EnableTransactionManagement
 @EnableScheduling
-@MapperScan(basePackages = "com.atp", annotationClass = Mapper.class)
+@MapperScan(basePackages = "com.atp.server.mapper", annotationClass = Mapper.class)
 public class AtpApplication {
+    /**
+     * 启动入口
+     * @param args
+     */
     public static void main(String[] args) {
         SpringApplication.run(AtpApplication.class, args);
     }

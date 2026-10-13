@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atp.server.mapper.SlaEscalationLogMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sla_escalation_log (ticket_id, timer_id, rule_name, action,
+                                        from_priority, to_priority, notify_to, success, error_msg)
+        VALUES (#{ticketId}, #{timerId}, #{ruleName}, #{action},
+                #{fromPriority}, #{toPriority}, #{notifyTo}, #{success}, #{errorMsg})
+    </insert>
+
+    <select id="listByTicket" resultType="com.atp.pojo.entity.ticket.SlaEscalationLog">
+        SELECT id, ticket_id, timer_id, rule_name, action, from_priority, to_priority,
+               notify_to, success, error_msg, create_time
+        FROM sla_escalation_log
+        WHERE ticket_id = #{ticketId}
+        ORDER BY id DESC
+    </select>
+</mapper>

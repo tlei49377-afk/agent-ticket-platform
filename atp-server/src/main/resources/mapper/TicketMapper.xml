@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atp.server.mapper.TicketMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ticket (ticket_no, title, content, channel, category_id, priority, status,
+                            requester_id, assignee_id, sla_policy_id,
+                            respond_deadline, resolve_deadline, create_by)
+        VALUES (#{ticketNo}, #{title}, #{content}, #{channel}, #{categoryId}, #{priority}, #{status},
+                #{requesterId}, #{assigneeId}, #{slaPolicyId},
+                #{respondDeadline}, #{resolveDeadline}, #{createBy})
+    </insert>
+
+    <select id="getById" resultType="com.atp.pojo.entity.ticket.Ticket">
+        SELECT id, ticket_no, title, content, channel, category_id, priority, status,
+        requester_id, assignee_id, sla_policy_id, respond_deadline, resolve_deadline,
+        first_respond_at, resolved_at, closed_at, reopen_count, satisfaction,
+        satisfaction_note, ai_handled, ai_run_id, create_by, create_time, update_time, deleted
+        FROM ticket
+        WHERE id = #{id}
+          AND deleted = 0
+    </select>
+
+    <select id="getByNo" resultType="com.atp.pojo.entity.ticket.Ticket">
+        SELECT id, ticket_no, title, content, channel, category_id, priority, status,
+        requester_id, assignee_id, sla_policy_id, respond_deadline, resolve_deadline,
+        first_respond_at, resolved_at, closed_at, reopen_count, satisfaction,
+        satisfaction_note, ai_handled, ai_run_id, create_by, create_time, update_time, deleted
+        FROM ticket
+        WHERE ticket_no = #{ticketNo}
+          AND deleted = 0
+    </select>
+
+    <!-- 列表。动态条件全部用 #{} 预编译，不要把用户输入拼进 SQL -->
+    <select id="pageQuery" resultType="com.atp.pojo.vo.ticket.TicketVO">
+        SELECT t.id, t.ticket_no, t.title, t.category_id, t.priority, t.status,
+        t.requester_id, t.assignee_id, t.respond_deadline, t.resolve_deadline,
+        t.create_time, t.update_time,
+        c.name AS category_name,
+        ru.name AS requester_name,
+        au.name AS assignee_name
+        FROM ticket t
+        LEFT JOIN ticket_category c ON c.id = t.category_id AND c.deleted = 0
+        LEFT JOIN sys_user ru ON ru.id = t.requester_id
+        LEFT JOIN sys_user au ON au.id = t.assignee_id
+        <where>
+            t.deleted = 0
+            <if test="status != null">AND t.status = #{status}</if>
+            <if test="priority != null">AND t.priority = #{priority}</if>
+            <if test="categoryId != null">AND t.category_id = #{categoryId}</if>
+            <if test="channel != null and channel != ''">AND t.channel = #{channel}</if>
+            <if test="requesterId != null">AND t.requester_id = #{requesterId}</if>
+            <if test="assigneeId != null">AND t.assignee_id = #{assigneeId}</if>
+            <if test="keyword != null and keyword != ''">
+                AND (t.title LIKE CONCAT('%', #{keyword}, '%')
+                OR t.ticket_no LIKE CONCAT('%', #{keyword}, '%')
+                OR t.content LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="createTimeStart != null">AND t.create_time &gt;= #{createTimeStart}</if>
+            <if test="createTimeEnd != null">AND t.create_time &lt;= #{createTimeEnd}</if>
+        </where>
+        <!-- 紧急的排前面，同优先级按创建时间倒序 -->
+        ORDER BY t.priority ASC, t.create_time DESC
+    </select>
+
+    <!-- 详情。比列表多这 5 列，所以单独写一条 -->
+    <select id="getVoById" resultType="com.atp.pojo.vo.ticket.TicketDetailVO">
+        SELECT t.id, t.ticket_no, t.title, t.category_id, t.priority, t.status,
+        t.requester_id, t.assignee_id, t.respond_deadline, t.resolve_deadline,
+        t.create_time, t.update_time,
+        c.name AS category_name,
+        ru.name AS requester_name,
+        au.name AS assignee_name,
+               t.content, t.first_respond_at, t.resolved_at, t.closed_at, t.reopen_count
+        FROM ticket t
+        LEFT JOIN ticket_category c ON c.id = t.category_id AND c.deleted = 0
+        LEFT JOIN sys_user ru ON ru.id = t.requester_id
+        LEFT JOIN sys_user au ON au.id = t.assignee_id
+        WHERE t.id = #{id}
+          AND t.deleted = 0
+    </select>
+
+    <update id="update">
+        UPDATE ticket
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="priority != null">priority = #{priority},</if>
+            <if test="assigneeId != null">assignee_id = #{assigneeId},</if>
+            <if test="satisfaction != null">satisfaction = #{satisfaction},</if>
+            <if test="satisfactionNote != null">satisfaction_note = #{satisfactionNote},</if>
+            <if test="aiHandled != null">ai_handled = #{aiHandled},</if>
+            <if test="aiRunId != null">ai_run_id = #{aiRunId},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <!-- 状态流转专用：只允许改状态、处理人、关闭时间 -->
+    <update id="updateStatus">
+        UPDATE ticket
+        <set>
+            status = #{status},
+            <if test="assigneeId != null">assignee_id = #{assigneeId},</if>
+            <if test="closeAt != null">closed_at = #{closeAt},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <update id="updateResolvedAt">
+        UPDATE ticket
+        SET resolved_at = #{resolvedAt}, update_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <!-- 带 first_respond_at IS NULL 条件：并发下也只会写进去一次 -->
+    <update id="updateFirstRespondAt">
+        UPDATE ticket
+        SET first_respond_at = #{firstRespondAt}, update_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
+          AND first_respond_at IS NULL
+    </update>
+
+    <update id="updateAssignee">
+        UPDATE ticket
+        SET assignee_id = #{assigneeId}, update_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <update id="updatePriority">
+        UPDATE ticket
+        SET priority = #{priority}, update_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <update id="increaseReopenCount">
+        UPDATE ticket
+        SET reopen_count = reopen_count + 1, update_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE ticket
+        SET deleted = 1, update_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+    <select id="countByNoPrefix" resultType="int">
+        SELECT COUNT(*)
+        FROM ticket
+        WHERE ticket_no LIKE CONCAT(#{prefix}, '%')
+    </select>
+
+    <select id="countByStatus" resultType="int">
+        SELECT COUNT(*)
+        FROM ticket
+        WHERE deleted = 0
+        <if test="status != null">AND status = #{status}</if>
+    </select>
+
+    <select id="listConfirmingBefore" resultType="com.atp.pojo.entity.ticket.Ticket">
+        SELECT id, ticket_no, title, content, channel, category_id, priority, status,
+        requester_id, assignee_id, sla_policy_id, respond_deadline, resolve_deadline,
+        first_respond_at, resolved_at, closed_at, reopen_count, satisfaction,
+        satisfaction_note, ai_handled, ai_run_id, create_by, create_time, update_time, deleted
+        FROM ticket
+        WHERE deleted = 0
+          AND status = 4
+          AND update_time &lt;= #{before}
+    </select>
+
+    <select id="listResolvedBefore" resultType="com.atp.pojo.entity.ticket.Ticket">
+        SELECT id, ticket_no, title, content, channel, category_id, priority, status,
+        requester_id, assignee_id, sla_policy_id, respond_deadline, resolve_deadline,
+        first_respond_at, resolved_at, closed_at, reopen_count, satisfaction,
+        satisfaction_note, ai_handled, ai_run_id, create_by, create_time, update_time, deleted
+        FROM ticket
+        WHERE deleted = 0
+          AND status = 5
+          AND resolved_at &lt;= #{before}
+    </select>
+</mapper>

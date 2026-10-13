@@ -1,7 +1,7 @@
 package com.atp.common.constant;
 
 /**
- * 业务状态码常量。
+ * 业务状态码常量。码值 → 中文名的翻译也放这里，避免在多个类里各写一份 switch。
  */
 public class StatusConstant {
 
@@ -18,6 +18,10 @@ public class StatusConstant {
     public static final int PRIORITY_HIGH   = 2; // 高
     public static final int PRIORITY_NORMAL = 3; // 中
     public static final int PRIORITY_LOW    = 4; // 低
+
+    /** SLA 计时器类型 */
+    public static final String TIMER_RESPOND = "respond"; // 响应型
+    public static final String TIMER_RESOLVE = "resolve"; // 解决型
 
     /** SLA 计时器状态 */
     public static final String SLA_NORMAL   = "normal";
@@ -40,6 +44,33 @@ public class StatusConstant {
     public static final String APPROVAL_REJECTED = "rejected";
     public static final String APPROVAL_EXPIRED  = "expired";
 
-    private StatusConstant() {
+    /** 工单状态码 → 中文名 */
+    public static String ticketStatusName(Integer status) {
+        if (status == null) {
+            return "未知";
+        }
+        return switch (status) {
+            case TICKET_PENDING -> "待受理";
+            case TICKET_PROCESSING -> "处理中";
+            case TICKET_SUSPENDED -> "已挂起";
+            case TICKET_CONFIRMING -> "待用户确认";
+            case TICKET_RESOLVED -> "已解决";
+            case TICKET_CLOSED -> "已关闭";
+            default -> "未知(" + status + ")";
+        };
+    }
+
+    /** 优先级码 → 中文名 */
+    public static String priorityName(Integer priority) {
+        if (priority == null) {
+            return "未知";
+        }
+        return switch (priority) {
+            case PRIORITY_URGENT -> "紧急";
+            case PRIORITY_HIGH -> "高";
+            case PRIORITY_NORMAL -> "中";
+            case PRIORITY_LOW -> "低";
+            default -> "未知(" + priority + ")";
+        };
     }
 }

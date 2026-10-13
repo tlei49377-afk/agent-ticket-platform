@@ -27,6 +27,13 @@ public class JwtTokenInterceptor implements HandlerInterceptor {
     @Autowired
     private JwtProperties jwtProperties;
 
+    /**
+     * 解析请求头里的令牌，把用户身份放进 request 作用域
+     * @param request
+     * @param response
+     * @param handler
+     * @return
+     */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
@@ -56,6 +63,13 @@ public class JwtTokenInterceptor implements HandlerInterceptor {
         }
     }
 
+    /**
+     * 请求结束清理 MDC
+     * @param request
+     * @param response
+     * @param handler
+     * @param ex
+     */
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
                                 Object handler, Exception ex) {

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atp.server.mapper.TicketAttachmentMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ticket_attachment (ticket_id, message_id, file_name, file_url,
+                                       file_size, file_type, upload_by)
+        VALUES (#{ticketId}, #{messageId}, #{fileName}, #{fileUrl},
+                #{fileSize}, #{fileType}, #{uploadBy})
+    </insert>
+
+    <select id="listByTicket" resultType="com.atp.pojo.entity.ticket.TicketAttachment">
+        SELECT id, ticket_id, message_id, file_name, file_url, file_size,
+               file_type, upload_by, create_time
+        FROM ticket_attachment
+        WHERE ticket_id = #{ticketId}
+          AND deleted = 0
+        ORDER BY id ASC
+    </select>
+</mapper>

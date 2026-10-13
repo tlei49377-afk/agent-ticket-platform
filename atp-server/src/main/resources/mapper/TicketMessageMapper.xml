@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atp.server.mapper.TicketMessageMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ticket_message (ticket_id, role, sender_id, content, visible, ai_run_id)
+        VALUES (#{ticketId}, #{role}, #{senderId}, #{content}, #{visible}, #{aiRunId})
+    </insert>
+
+    <!-- visible 传 null 就不过滤；提交人查的时候固定传 public -->
+    <select id="listByTicket" resultType="com.atp.pojo.vo.ticket.TicketMessageVO">
+        SELECT m.id, m.role, m.sender_id, m.content, m.visible, m.create_time,
+               u.name AS sender_name
+        FROM ticket_message m
+                 LEFT JOIN sys_user u ON u.id = m.sender_id
+        WHERE m.ticket_id = #{ticketId}
+          AND m.deleted = 0
+        <if test="visible != null">AND m.visible = #{visible}</if>
+        ORDER BY m.create_time ASC, m.id ASC
+    </select>
+</mapper>
