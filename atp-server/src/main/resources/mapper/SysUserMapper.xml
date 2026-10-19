@@ -23,6 +23,24 @@
                  JOIN sys_role r ON r.id = ur.role_id AND r.deleted = 0 AND r.status = 1
         WHERE ur.user_id = #{userId}
     </select>
+    <select id="listUsers" resultType="com.atp.pojo.vo.sys.UserVO">
+        SELECT u.id, u.username, u.name
+        FROM sys_user u
+        LEFT JOIN sys_user_role ur ON ur.user_id = u.id
+        LEFT JOIN sys_role r ON r.id = ur.role_id
+        WHERE u.deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND (u.name LIKE CONCAT('%', #{keyword}, '%') OR u.username LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="roleCode != null and roleCode != ''">
+            AND r.code = #{roleCode}
+        </if>
+        GROUP BY u.id, u.username, u.name
+    </select>
+
+    <select id="getNameById" resultType="java.lang.String">
+        SELECT name FROM sys_user WHERE id = #{id} AND deleted = 0
+    </select>
 
     <update id="updateLastLoginAt">
         UPDATE sys_user

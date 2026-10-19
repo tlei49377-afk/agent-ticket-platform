@@ -7,15 +7,27 @@ import lombok.Data;
  */
 @Data
 public class PageQuery {
+
+    //页码，从 1 开始
     private Integer page = 1;
+
+    //每页条数
     private Integer pageSize = 10;
 
-    public Integer getPage(){
+    /**
+     * 取页码：没传或者小于 1 都按第 1 页处理
+     * @return
+     */
+    public Integer getPage() {
         return (page == null || page < 1) ? 1 : page;
     }
 
-    public Integer getPageSize(){
-        if(pageSize == null || pageSize < 1){
+    /**
+     * 取每页条数：没传给 10，最大 100，避免前端传个超大值把库拖垮
+     * @return
+     */
+    public Integer getPageSize() {
+        if (pageSize == null || pageSize < 1) {
             return 10;
         }
         return Math.min(pageSize, 100);

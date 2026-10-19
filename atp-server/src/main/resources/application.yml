@@ -16,7 +16,8 @@ spring:
       max-request-size: 40MB
 
 mybatis:
-  mapper-locations: classpath:mapper/**/*.xml
+  # classpath*: 才是"所有模块的 classpath 都扫一遍"；atp-agent 里的 XML 靠它才扫得到
+  mapper-locations: classpath*:mapper/**/*.xml
   type-aliases-package: com.atp.pojo.entity
   configuration:
     map-underscore-to-camel-case: true

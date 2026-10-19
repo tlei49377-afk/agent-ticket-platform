@@ -17,6 +17,10 @@
         </dependency>
         <dependency>
             <groupId>com.atp</groupId>
+            <artifactId>atp-pojo</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.atp</groupId>
             <artifactId>atp-agent</artifactId>
         </dependency>
         <dependency>

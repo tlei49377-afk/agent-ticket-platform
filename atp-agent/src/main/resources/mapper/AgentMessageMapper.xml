@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atp.agent.mapper.AgentMessageMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO agent_message (session_id, run_id, role, content, tool_calls, tool_call_id,
+                                   tool_code, token_in, token_out, cost, latency_ms, seq)
+        VALUES (#{sessionId}, #{runId}, #{role}, #{content}, #{toolCalls}, #{toolCallId},
+                #{toolCode},
+                <!-- 这几个字段在表里是 NOT NULL DEFAULT 0，显式传 NULL 会报
+                     "Column cannot be null"，默认值只在整列省略时才生效，所以这里兜一下 -->
+                COALESCE(#{tokenIn}, 0), COALESCE(#{tokenOut}, 0), COALESCE(#{cost}, 0),
+                COALESCE(#{latencyMs}, 0), COALESCE(#{seq}, 0))
+    </insert>
+
+    <select id="listByMemoryId" resultType="com.atp.pojo.vo.agent.MessageVO">
+        SELECT m.id, m.role, m.content, m.create_time
+        FROM agent_message m
+        JOIN agent_session s ON s.id = m.session_id
+        WHERE s.memory_id = #{memoryId}
+        ORDER BY m.seq ASC, m.id ASC
+    </select>
+
+    <select id="nextSeq" resultType="java.lang.Integer">
+        SELECT COALESCE(MAX(seq), 0) + 1 FROM agent_message WHERE session_id = #{sessionId}
+    </select>
+
+    <delete id="deleteByMemoryId">
+        DELETE m FROM agent_message m
+        JOIN agent_session s ON s.id = m.session_id
+        WHERE s.memory_id = #{memoryId}
+    </delete>
+</mapper>

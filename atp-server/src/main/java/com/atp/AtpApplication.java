@@ -10,7 +10,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication
 @EnableTransactionManagement
 @EnableScheduling
-@MapperScan(basePackages = "com.atp.server.mapper", annotationClass = Mapper.class)
+// 扫整个 com.atp：atp-server 和 atp-agent 两个模块的 Mapper 都要收进来，
+// annotationClass 只认带 @Mapper 的接口，不会误收别的
+@MapperScan(basePackages = "com.atp", annotationClass = Mapper.class)
 public class AtpApplication {
     /**
      * 启动入口

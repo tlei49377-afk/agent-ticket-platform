@@ -13,6 +13,7 @@ import java.util.List;
 public class UserAccessService {
 
     // 这三个角色算内部人员，能看到全部工单
+    // 其他角色只能看到自己提交的工单
     private static final List<String> STAFF_ROLES = List.of("agent", "supervisor", "admin");
 
     @Autowired

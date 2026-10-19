@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atp.agent.mapper.AgentRunStepMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO agent_run_step (run_id, seq, node, input_snap, output_snap,
+                                    tool_code, status, error_msg, cost_ms)
+        VALUES (#{runId}, #{seq}, #{node}, #{inputSnap}, #{outputSnap},
+                #{toolCode}, #{status}, #{errorMsg}, COALESCE(#{costMs}, 0))
+    </insert>
+
+    <select id="listByRun" resultType="com.atp.pojo.entity.agent.AgentRunStep">
+        SELECT * FROM agent_run_step WHERE run_id = #{runId} ORDER BY seq
+    </select>
+</mapper>

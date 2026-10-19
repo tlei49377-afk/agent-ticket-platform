@@ -1,6 +1,7 @@
 package com.atp.server.mapper;
 
 import com.atp.pojo.entity.sys.SysUser;
+import com.atp.pojo.vo.sys.UserVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -26,7 +27,11 @@ public interface SysUserMapper {
      */
     SysUser getById(@Param("id") Long id);
 
-    /** 当前用户有哪些角色编码，用来判断数据可见范围 */
+    /**
+     * 当前用户有哪些角色编码，用来判断数据可见范围
+     * @param userId
+     * @return
+     */
     List<String> listRoleCodesByUserId(@Param("userId") Long userId);
 
     /**
@@ -35,4 +40,19 @@ public interface SysUserMapper {
      * @return
      */
     int updateLastLoginAt(@Param("id") Long id);
+
+    /**
+     * 按关键词或角色查用户，两个条件都可空
+     * @param keyword 关键词，匹配姓名或用户名
+     * @param roleCode 角色编码，如 agent
+     * @return 用户列表
+     */
+    List<UserVO> listUsers(@Param("keyword") String keyword, @Param("roleCode") String roleCode);
+
+    /**
+     * 查一个人的姓名，转派工单时要用来回显 "已转给张三"
+     * @param id 用户 ID
+     * @return 姓名，取不到返回 null
+     */
+    String getNameById(@Param("id") Long id);
 }

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atp.agent.mapper.AgentRunMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO agent_run (run_no, session_id, agent_id, user_id, trace_id, input_text,
+                               status, prompt_version, git_commit, started_at)
+        VALUES (#{runNo}, #{sessionId}, #{agentId}, #{userId}, #{traceId}, #{inputText},
+                #{status}, #{promptVersion}, #{gitCommit}, NOW())
+    </insert>
+
+    <select id="getByRunNo" resultType="com.atp.pojo.entity.agent.AgentRun">
+        SELECT * FROM agent_run WHERE run_no = #{runNo}
+    </select>
+
+    <update id="finish">
+        UPDATE agent_run
+        SET status = #{status},
+            output_text = COALESCE(#{outputText}, output_text),
+            latency_ms = COALESCE(#{latencyMs}, latency_ms),
+            error_msg = #{errorMsg},
+            ended_at = NOW()
+        WHERE id = #{id}
+    </update>
+</mapper>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atp.agent.mapper.AgentSessionMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO agent_session (agent_id, user_id, title, memory_id, ticket_id, last_active_at, status)
+        VALUES (#{agentId}, #{userId}, #{title},
+                <!-- memory_id 是 NOT NULL + 唯一索引，而它的正式值要用自增 id 拼，
+                     插入时拿不到，所以先用 tmp:UUID 占位，紧接着 updateMemoryId 覆盖掉 -->
+                COALESCE(#{memoryId}, CONCAT('tmp:', UUID())),
+                #{ticketId}, #{lastActiveAt}, #{status})
+    </insert>
+
+    <update id="updateMemoryId">
+        UPDATE agent_session SET memory_id = #{memoryId} WHERE id = #{id}
+    </update>
+
+    <select id="getByMemoryId" resultType="com.atp.pojo.entity.agent.AgentSession">
+        SELECT * FROM agent_session WHERE memory_id = #{memoryId} AND deleted = 0
+    </select>
+
+    <select id="listByUser" resultType="com.atp.pojo.vo.agent.SessionVO">
+        SELECT memory_id, title, last_active_at
+        FROM agent_session
+        WHERE user_id = #{userId} AND deleted = 0 AND status = 1
+        ORDER BY last_active_at DESC
+        LIMIT #{limit}
+    </select>
+
+    <update id="touchLastActive">
+        UPDATE agent_session SET last_active_at = NOW() WHERE memory_id = #{memoryId}
+    </update>
+
+    <update id="deleteByMemoryId">
+        UPDATE agent_session SET deleted = 1 WHERE memory_id = #{memoryId} AND user_id = #{userId}
+    </update>
+</mapper>
