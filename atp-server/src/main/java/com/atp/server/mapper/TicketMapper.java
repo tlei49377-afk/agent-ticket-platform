@@ -3,6 +3,7 @@ package com.atp.server.mapper;
 import com.atp.pojo.entity.ticket.Ticket;
 import com.atp.pojo.query.TicketPageQueryDTO;
 import com.atp.pojo.vo.ticket.TicketDetailVO;
+import com.atp.pojo.vo.ticket.TicketStatsVO;
 import com.atp.pojo.vo.ticket.TicketVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -122,15 +123,23 @@ public interface TicketMapper {
      */
     int countByStatus(@Param("status") Integer status);
 
-    /** 「待用户确认」超过 before 还没人确认的，2.7 自动流转用
+    /** 「待用户确认」超过 before 还没人确认的，自动流转用
      * @param before
      * @return
      */
     List<Ticket> listConfirmingBefore(@Param("before") LocalDateTime before);
 
-    /** 「已解决」超过 before 还没关闭的，2.7 自动流转用
+    /** 「已解决」超过 before 还没关闭的，自动流转用
      * @param before
      * @return
      */
     List<Ticket> listResolvedBefore(@Param("before") LocalDateTime before);
+
+    /**
+     * 按时间范围统计，dimension 只用来定 from，SQL 里不区分维度。
+     *
+     * @param from 统计起始时间
+     * @return 工单统计结果
+     */
+    TicketStatsVO stats(@Param("from") LocalDateTime from);
 }

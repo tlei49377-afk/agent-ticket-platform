@@ -8,7 +8,7 @@ import com.atp.pojo.entity.ticket.TicketCategory;
 import com.atp.pojo.vo.ticket.CategoryTreeVO;
 import com.atp.server.mapper.TicketCategoryMapper;
 import com.atp.server.service.TicketCategoryService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,10 +21,10 @@ import java.util.Map;
  * 工单分类实现。树在内存里拼，不做递归查库。
  */
 @Service
+@RequiredArgsConstructor
 public class TicketCategoryServiceImpl implements TicketCategoryService {
 
-    @Autowired
-    private TicketCategoryMapper categoryMapper;
+    private final TicketCategoryMapper categoryMapper;
 
     /**
      * 全部启用中的分类

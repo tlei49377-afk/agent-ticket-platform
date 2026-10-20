@@ -1,7 +1,7 @@
 package com.atp.server.service;
 
 import com.atp.server.mapper.SysUserMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,14 +10,14 @@ import java.util.List;
  * 判断当前用户能看到多大范围的数据。数据隔离的规则只在这一处写。
  */
 @Service
+@RequiredArgsConstructor
 public class UserAccessService {
 
     // 这三个角色算内部人员，能看到全部工单
     // 其他角色只能看到自己提交的工单
     private static final List<String> STAFF_ROLES = List.of("agent", "supervisor", "admin");
 
-    @Autowired
-    private SysUserMapper sysUserMapper;
+    private final SysUserMapper sysUserMapper;
 
     /**
      * 是不是内部人员：agent / supervisor / admin 之一

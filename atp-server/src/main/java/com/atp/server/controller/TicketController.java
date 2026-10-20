@@ -18,7 +18,7 @@ import com.atp.server.service.TicketService;
 import com.atp.server.service.TicketStatusService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,16 +35,13 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/tickets")
+@RequiredArgsConstructor
 public class TicketController {
 
-    @Autowired
-    private TicketService ticketService;
-    @Autowired
-    private TicketStatusService ticketStatusService;
-    @Autowired
-    private TicketMessageService ticketMessageService;
-    @Autowired
-    private HttpServletRequest request;
+    private final TicketService ticketService;
+    private final TicketStatusService ticketStatusService;
+    private final TicketMessageService ticketMessageService;
+    private final HttpServletRequest request;
 
     /**
      * 工单列表：分页 + 条件筛选

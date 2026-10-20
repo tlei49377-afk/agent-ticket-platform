@@ -13,7 +13,7 @@ import com.atp.server.mapper.TicketMessageMapper;
 import com.atp.server.service.TicketMessageService;
 import com.atp.server.service.UserAccessService;
 import com.atp.server.statemachine.TicketStateMachine;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,14 +24,12 @@ import java.util.List;
  * 工单消息实现。可见性由服务端根据角色推导，前端传什么都不作数。
  */
 @Service
+@RequiredArgsConstructor
 public class TicketMessageServiceImpl implements TicketMessageService {
 
-    @Autowired
-    private TicketMessageMapper messageMapper;
-    @Autowired
-    private TicketMapper ticketMapper;
-    @Autowired
-    private UserAccessService userAccessService;
+    private final TicketMessageMapper messageMapper;
+    private final TicketMapper ticketMapper;
+    private final UserAccessService userAccessService;
 
     /**
      * 内部人员看全部消息，其他人只看 public

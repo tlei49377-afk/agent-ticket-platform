@@ -9,8 +9,8 @@ import com.atp.server.mapper.SysUserMapper;
 import com.atp.server.properties.JwtProperties;
 import com.atp.server.service.SysUserService;
 import com.atp.server.util.JwtUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,13 +19,12 @@ import java.util.Map;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class SysUserServiceImpl implements SysUserService {
 
-    @Autowired
-    private SysUserMapper sysUserMapper;
+    private final SysUserMapper sysUserMapper;
 
-    @Autowired
-    private JwtProperties jwtProperties;
+    private final JwtProperties jwtProperties;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 

@@ -7,7 +7,7 @@ import com.atp.pojo.entity.ticket.TicketCategory;
 import com.atp.pojo.vo.ticket.CategoryTreeVO;
 import com.atp.server.service.TicketCategoryService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,10 +23,10 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/categories")
+@RequiredArgsConstructor
 public class CategoryController {
 
-    @Autowired
-    private TicketCategoryService categoryService;
+    private final TicketCategoryService categoryService;
 
     /**
      * 分类树，前端级联选择器用

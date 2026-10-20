@@ -5,7 +5,7 @@ import com.atp.common.exception.BaseException;
 import com.atp.pojo.entity.ticket.SlaPolicy;
 import com.atp.server.mapper.SlaPolicyMapper;
 import com.atp.server.service.SlaPolicyService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,10 +15,10 @@ import java.util.List;
  * SLA 策略实现。
  */
 @Service
+@RequiredArgsConstructor
 public class SlaPolicyServiceImpl implements SlaPolicyService {
 
-    @Autowired
-    private SlaPolicyMapper slaPolicyMapper;
+    private final SlaPolicyMapper slaPolicyMapper;
 
     /**
      * 全部策略

@@ -5,8 +5,8 @@ import com.atp.pojo.dto.sys.LoginDTO;
 import com.atp.pojo.vo.sys.LoginVO;
 import com.atp.server.service.SysUserService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Slf4j
+@RequiredArgsConstructor
 public class LoginController {
-    @Autowired
-    private SysUserService sysUserService;
+    private final SysUserService sysUserService;
 
     /**
      * 登录：校验账号密码，返回用户信息和令牌

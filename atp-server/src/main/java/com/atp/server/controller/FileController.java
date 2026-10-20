@@ -9,7 +9,7 @@ import com.atp.server.mapper.TicketAttachmentMapper;
 import com.atp.server.mapper.TicketMapper;
 import com.atp.server.properties.UploadProperties;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,6 +31,7 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/files")
+@RequiredArgsConstructor
 public class FileController {
 
     /** 扩展名白名单。不在名单里的一律拒绝，别信前端传来的文件名 */
@@ -39,12 +40,9 @@ public class FileController {
 
     private static final DateTimeFormatter DAY = DateTimeFormatter.ofPattern("yyyyMMdd");
 
-    @Autowired
-    private TicketAttachmentMapper attachmentMapper;
-    @Autowired
-    private TicketMapper ticketMapper;
-    @Autowired
-    private UploadProperties uploadProperties;
+    private final TicketAttachmentMapper attachmentMapper;
+    private final TicketMapper ticketMapper;
+    private final UploadProperties uploadProperties;
 
     /**
      * 上传附件：校验类型 → 落到磁盘 → 元数据入库 → 返回可访问的 URL

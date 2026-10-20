@@ -3,8 +3,8 @@ package com.atp.server.task;
 import com.atp.pojo.entity.ticket.SlaTimer;
 import com.atp.server.service.SlaEscalationService;
 import com.atp.server.service.SlaTimerService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -13,12 +13,11 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class SlaPatrolTask {
 
-    @Autowired
-    private SlaTimerService slaTimerService;
-    @Autowired
-    private SlaEscalationService slaEscalationService;
+    private final SlaTimerService slaTimerService;
+    private final SlaEscalationService slaEscalationService;
 
     /**
      * 巡检一趟：先刷新计时器状态，再把超期没升级的升掉

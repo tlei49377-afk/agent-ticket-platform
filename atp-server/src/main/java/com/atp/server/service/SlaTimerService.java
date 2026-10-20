@@ -26,4 +26,11 @@ public interface SlaTimerService {
 
     /** 巡检第二步：捞出超期且没升级过的计时器 */
     List<SlaTimer> breachedNotEscalated();
+
+    /**
+     * 查询还没判超期的计时器，SLA 查询工具用它捞“即将超期”的数据。
+     *
+     * @return 未超期计时器列表
+     */
+    List<SlaTimer> listNotBreached();
 }

@@ -5,9 +5,9 @@ import com.atp.server.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -19,13 +19,13 @@ import org.springframework.web.servlet.HandlerInterceptor;
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class JwtTokenInterceptor implements HandlerInterceptor {
 
     public static final String ATTR_CALLER_ID = "callerId";
     public static final String ATTR_CALLER_NAME = "callerName";
 
-    @Autowired
-    private JwtProperties jwtProperties;
+    private final JwtProperties jwtProperties;
 
     /**
      * 解析请求头里的令牌，把用户身份放进 request 作用域

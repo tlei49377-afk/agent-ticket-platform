@@ -27,7 +27,7 @@ import com.atp.server.service.UserAccessService;
 import com.atp.server.statemachine.TicketStateMachine;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,26 +42,19 @@ import java.util.List;
  * 工单读写实现。分页、数据隔离、建单时的 SLA 计算都在这里。
  */
 @Service
+@RequiredArgsConstructor
 public class TicketServiceImpl implements TicketService {
 
     private static final DateTimeFormatter DAY = DateTimeFormatter.ofPattern("yyyyMMdd");
 
-    @Autowired
-    private TicketMapper ticketMapper;
-    @Autowired
-    private TicketStatusLogMapper statusLogMapper;
-    @Autowired
-    private TicketCategoryService categoryService;
-    @Autowired
-    private TicketMessageService messageService;
-    @Autowired
-    private SlaPolicyService slaPolicyService;
-    @Autowired
-    private SlaTimerService slaTimerService;
-    @Autowired
-    private SysUserMapper sysUserMapper;
-    @Autowired
-    private UserAccessService userAccessService;
+    private final TicketMapper ticketMapper;
+    private final TicketStatusLogMapper statusLogMapper;
+    private final TicketCategoryService categoryService;
+    private final TicketMessageService messageService;
+    private final SlaPolicyService slaPolicyService;
+    private final SlaTimerService slaTimerService;
+    private final SysUserMapper sysUserMapper;
+    private final UserAccessService userAccessService;
 
     /**
      * 分页查询。普通提交人只会查到自己的单子

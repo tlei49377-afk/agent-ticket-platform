@@ -3,8 +3,8 @@ package com.atp.server.service.impl;
 import com.alibaba.fastjson2.JSON;
 import com.atp.server.mapper.PermissionMapper;
 import com.atp.server.service.PermissionService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -13,16 +13,15 @@ import java.util.List;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class PermissionServiceImpl implements PermissionService {
     // 缓存key前缀
     private static final String CACHE_KEY_PREFIX = "perm:user:";
     // 缓存有效期
     private static final Duration CACHE_TTL = Duration.ofMinutes(30);
 
-    @Autowired
-    private PermissionMapper permissionMapper;
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
+    private final PermissionMapper permissionMapper;
+    private final StringRedisTemplate stringRedisTemplate;
 
     /**
      * 先查缓存，没有再去库里查并回填

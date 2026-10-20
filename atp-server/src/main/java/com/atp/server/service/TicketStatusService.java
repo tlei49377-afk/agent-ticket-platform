@@ -8,8 +8,8 @@ import com.atp.pojo.entity.ticket.TicketStatusLog;
 import com.atp.server.mapper.TicketMapper;
 import com.atp.server.mapper.TicketStatusLogMapper;
 import com.atp.server.statemachine.TicketStateMachine;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,12 +20,11 @@ import java.time.LocalDateTime;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class TicketStatusService {
 
-    @Autowired
-    private TicketMapper ticketMapper;
-    @Autowired
-    private TicketStatusLogMapper statusLogMapper;
+    private final TicketMapper ticketMapper;
+    private final TicketStatusLogMapper statusLogMapper;
 
     /**
      * 校验 → 更新 → 留痕，三步在同一个事务里。

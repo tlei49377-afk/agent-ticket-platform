@@ -8,7 +8,7 @@ import com.atp.server.mapper.SlaPolicyMapper;
 import com.atp.server.mapper.SlaTimerMapper;
 import com.atp.server.mapper.TicketMapper;
 import com.atp.server.service.SlaTimerService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,14 +20,12 @@ import java.util.List;
  * SLA 计时器实现。巡检在这里刷新状态，超期判定只认「截止时间到了没」。
  */
 @Service
+@RequiredArgsConstructor
 public class SlaTimerServiceImpl implements SlaTimerService {
 
-    @Autowired
-    private SlaTimerMapper slaTimerMapper;
-    @Autowired
-    private TicketMapper ticketMapper;
-    @Autowired
-    private SlaPolicyMapper slaPolicyMapper;
+    private final SlaTimerMapper slaTimerMapper;
+    private final TicketMapper ticketMapper;
+    private final SlaPolicyMapper slaPolicyMapper;
 
     /**
      * 建单时开两个计时器：响应型 + 解决型
@@ -118,5 +116,15 @@ public class SlaTimerServiceImpl implements SlaTimerService {
         timer.setState(StatusConstant.SLA_NORMAL);
         timer.setEscalated(0);
         return timer;
+    }
+
+    /**
+     * 查询还没判超期的计时器。
+     *
+     * @return 未超期计时器列表
+     */
+    @Override
+    public List<SlaTimer> listNotBreached() {
+        return slaTimerMapper.listNotBreached();
     }
 }

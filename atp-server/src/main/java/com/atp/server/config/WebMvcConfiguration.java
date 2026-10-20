@@ -2,7 +2,7 @@ package com.atp.server.config;
 
 import com.atp.server.interceptor.JwtTokenInterceptor;
 import com.atp.server.properties.UploadProperties;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -12,12 +12,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.nio.file.Paths;
 
 @Configuration
+@RequiredArgsConstructor
 public class WebMvcConfiguration implements WebMvcConfigurer {
 
-    @Autowired
-    private JwtTokenInterceptor jwtTokenInterceptor;
-    @Autowired
-    private UploadProperties uploadProperties;
+    private final JwtTokenInterceptor jwtTokenInterceptor;
+    private final UploadProperties uploadProperties;
 
     /**
      * 注册 JWT 拦截器。登录、附件、健康检查、接口文档这些路径放行

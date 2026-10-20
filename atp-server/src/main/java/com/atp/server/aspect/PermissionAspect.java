@@ -7,6 +7,7 @@ import com.atp.common.exception.PermissionDeniedException;
 import com.atp.server.interceptor.JwtTokenInterceptor;
 import com.atp.server.service.PermissionService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -14,7 +15,6 @@ import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
@@ -25,13 +25,12 @@ import java.lang.reflect.Method;
 @Aspect
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class PermissionAspect {
 
-    @Autowired
-    private PermissionService permissionService;
+    private final PermissionService permissionService;
 
-    @Autowired
-    private HttpServletRequest request;
+    private final HttpServletRequest request;
 
     /**
      * 只切 controller 层。AI 工具的权限校验在 ToolExecutor 里做，

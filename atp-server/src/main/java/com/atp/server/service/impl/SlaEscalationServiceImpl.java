@@ -8,8 +8,8 @@ import com.atp.server.mapper.SlaEscalationLogMapper;
 import com.atp.server.mapper.SlaTimerMapper;
 import com.atp.server.mapper.TicketMapper;
 import com.atp.server.service.SlaEscalationService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,14 +18,12 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class SlaEscalationServiceImpl implements SlaEscalationService {
 
-    @Autowired
-    private SlaTimerMapper slaTimerMapper;
-    @Autowired
-    private TicketMapper ticketMapper;
-    @Autowired
-    private SlaEscalationLogMapper escalationLogMapper;
+    private final SlaTimerMapper slaTimerMapper;
+    private final TicketMapper ticketMapper;
+    private final SlaEscalationLogMapper escalationLogMapper;
 
     /**
      * 升级：先抢幂等标记，抢到才提优先级并写升级日志

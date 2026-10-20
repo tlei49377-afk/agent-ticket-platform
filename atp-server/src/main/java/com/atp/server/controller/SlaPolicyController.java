@@ -4,7 +4,7 @@ import com.atp.common.annotation.RequirePermission;
 import com.atp.common.result.Result;
 import com.atp.pojo.entity.ticket.SlaPolicy;
 import com.atp.server.service.SlaPolicyService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,10 +21,10 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/sla/policies")
+@RequiredArgsConstructor
 public class SlaPolicyController {
 
-    @Autowired
-    private SlaPolicyService slaPolicyService;
+    private final SlaPolicyService slaPolicyService;
 
     /**
      * 策略列表
