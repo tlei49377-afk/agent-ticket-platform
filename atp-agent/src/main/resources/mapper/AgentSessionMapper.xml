@@ -28,6 +28,17 @@
         LIMIT #{limit}
     </select>
 
+    <update id="touch">
+        UPDATE agent_session
+        SET last_active_at = NOW(),
+            title = CASE
+                        WHEN title IS NULL OR TRIM(title) = '' OR title = '新会话'
+                            THEN #{title}
+                        ELSE title
+                    END
+        WHERE memory_id = #{memoryId} AND deleted = 0
+    </update>
+
     <update id="touchLastActive">
         UPDATE agent_session SET last_active_at = NOW() WHERE memory_id = #{memoryId}
     </update>

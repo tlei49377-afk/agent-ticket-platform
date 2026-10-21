@@ -29,14 +29,22 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AgentSessionServiceImpl implements AgentSessionService {
 
+    /** 会话列表最多返回条数。 */
     private static final int MAX_SESSIONS = 10;
+
+    /** 默认会话标题，首次用户消息到来时替换成摘要。 */
+    private static final String DEFAULT_TITLE = "新会话";
+
+    /** 会话标题最大长度，与 agent_session.title 的 200 字符列宽留出余量。 */
+    private static final int TITLE_MAX_LENGTH = 30;
 
     private final AgentSessionMapper sessionMapper;
     private final AgentMessageMapper messageMapper;
     private final ChatMemoryStore chatMemoryStore;
 
     /**
-     * 新建会话，memoryId 格式 {userId}:{sessionId}
+     * 新建会话，memoryId 格式 {userId}:{sessionId}。
+     *
      * @param agentId Agent ID
      * @param userId 归属用户 ID
      * @return memoryId
@@ -47,7 +55,7 @@ public class AgentSessionServiceImpl implements AgentSessionService {
         AgentSession session = new AgentSession();
         session.setAgentId(agentId);
         session.setUserId(userId);
-        session.setTitle("新会话");
+        session.setTitle(DEFAULT_TITLE);
         session.setLastActiveAt(LocalDateTime.now());
         session.setStatus(1);
         // 先插，拿到自增 id 才能拼 memoryId
@@ -61,7 +69,8 @@ public class AgentSessionServiceImpl implements AgentSessionService {
     }
 
     /**
-     * 当前用户的会话列表，最多 10 条
+     * 当前用户的会话列表，最多 10 条。
+     *
      * @param userId 用户 ID
      * @return 会话列表
      */
@@ -71,7 +80,8 @@ public class AgentSessionServiceImpl implements AgentSessionService {
     }
 
     /**
-     * 会话消息，先过归属校验
+     * 会话消息，先过归属校验。
+     *
      * @param userId 当前登录人 ID
      * @param memoryId 记忆标识
      * @return 消息列表
@@ -83,7 +93,8 @@ public class AgentSessionServiceImpl implements AgentSessionService {
     }
 
     /**
-     * 删除会话：消息物理删、会话逻辑删、记忆清掉
+     * 删除会话：消息物理删、会话逻辑删、记忆清掉。
+     *
      * @param userId 当前登录人 ID
      * @param memoryId 记忆标识
      */
@@ -97,9 +108,12 @@ public class AgentSessionServiceImpl implements AgentSessionService {
     }
 
     /**
-     * 会话归属校验：不属于该用户直接抛异常
+     * 会话归属校验：不属于该用户直接抛异常。
+     *
      * @param userId 当前登录人 ID
      * @param memoryId 记忆标识
+     * @throws BaseException 会话不存在时抛出
+     * @throws PermissionDeniedException 会话不属于当前用户时抛出
      */
     @Override
     public void requireOwned(Long userId, String memoryId) {
@@ -114,31 +128,87 @@ public class AgentSessionServiceImpl implements AgentSessionService {
     }
 
     /**
-     * 记一条消息，seq 取会话内当前最大值 + 1
+     * 刷新最后活跃时间，并在标题仍为默认值时写入首句摘要。
+     *
+     * @param memoryId 记忆标识
+     * @param message 用户本轮输入
+     */
+    @Override
+    public void touch(String memoryId, String message) {
+        sessionMapper.touch(memoryId, summarize(message));
+    }
+
+    /**
+     * 记一条基础消息，token、成本与耗时均记 0。
+     *
      * @param memoryId 记忆标识
      * @param runId 所属 run，可空
      * @param role user/ai/tool/system
      * @param content 内容
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void appendMessage(String memoryId, Long runId, String role, String content) {
+        appendMessage(memoryId, runId, role, content, 0, 0, BigDecimal.ZERO, 0);
+    }
+
+    /**
+     * 记一条带用量信息的消息，seq 取会话内当前最大值 + 1。
+     *
+     * @param memoryId 记忆标识
+     * @param runId 所属 run，可空
+     * @param role user/ai/tool/system
+     * @param content 内容
+     * @param tokenIn 输入 token 数
+     * @param tokenOut 输出 token 数
+     * @param cost 本次调用成本
+     * @param latencyMs 本次调用耗时毫秒
+     * @throws BaseException 会话不存在时抛出
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void appendMessage(String memoryId,
+                              Long runId,
+                              String role,
+                              String content,
+                              int tokenIn,
+                              int tokenOut,
+                              BigDecimal cost,
+                              int latencyMs) {
         AgentSession session = sessionMapper.getByMemoryId(memoryId);
         if (session == null) {
             throw new BaseException("会话不存在");
         }
+
         AgentMessage message = new AgentMessage();
         message.setSessionId(session.getId());
         message.setRunId(runId);
         message.setRole(role);
         message.setContent(content);
-        message.setTokenIn(0);
-        message.setTokenOut(0);
-        message.setCost(BigDecimal.ZERO);
-        message.setLatencyMs(0);
+        message.setTokenIn(tokenIn);
+        message.setTokenOut(tokenOut);
+        message.setCost(cost == null ? BigDecimal.ZERO : cost);
+        message.setLatencyMs(latencyMs);
         message.setSeq(messageMapper.nextSeq(session.getId()));
         messageMapper.insert(message);
 
-        // 让会话列表按"最近聊过"排序
+        // 让会话列表按“最近聊过”排序
         sessionMapper.touchLastActive(memoryId);
+    }
+
+    /**
+     * 把首条消息压缩成适合会话列表展示的短标题。
+     *
+     * @param message 用户输入
+     * @return 最多 30 个字符的标题；空消息返回默认标题
+     */
+    private String summarize(String message) {
+        if (message == null || message.isBlank()) {
+            return DEFAULT_TITLE;
+        }
+        String normalized = message.replaceAll("\\s+", " ").trim();
+        return normalized.length() <= TITLE_MAX_LENGTH
+                ? normalized
+                : normalized.substring(0, TITLE_MAX_LENGTH) + "…";
     }
 }

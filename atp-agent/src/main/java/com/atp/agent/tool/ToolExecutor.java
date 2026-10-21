@@ -35,13 +35,25 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class ToolExecutor {
 
+    /** 幂等缓存 Redis 前缀。 */
     private static final String IDEMPOTENT_PREFIX = "tool:idem:";
 
+    /** 工具注册表。 */
     private final AgentToolRegistry registry;
+
+    /** 工具元数据 Mapper。 */
     private final AgentToolMetaMapper toolMetaMapper;
+
+    /** 权限检查器。 */
     private final PermissionChecker permissionChecker;
+
+    /** Redis 客户端，用于幂等缓存。 */
     private final StringRedisTemplate redis;
+
+    /** 审计服务。 */
     private final AuditService auditService;
+
+    /** 工具执行步骤记录器。 */
     private final RunStepRecorder stepRecorder;
 
     /**
@@ -64,18 +76,21 @@ public class ToolExecutor {
         AgentTool tool = registry.get(toolCode);
         if (tool == null) {
             log.warn("模型调用了不存在的工具：{}", toolCode);
-            return ToolResult.fail(MessageConstant.TOOL_NOT_FOUND + "：" + toolCode);
+            return recordStep(ctx, toolCode, "error",
+                    ToolResult.fail(MessageConstant.TOOL_NOT_FOUND + "：" + toolCode), start);
         }
 
         // ---- 第 2 关：该 Agent 是否被授权 ----
         if (agentToolScope != null && !agentToolScope.contains(toolCode)) {
             log.warn("Agent 未被授权使用工具 {}", toolCode);
-            return ToolResult.fail("当前助手不具备该能力");
+            return recordStep(ctx, toolCode, "error",
+                    ToolResult.fail("当前助手不具备该能力"), start);
         }
 
         AgentToolMeta meta = toolMetaMapper.getByCode(toolCode);
         if (meta == null || !Integer.valueOf(1).equals(meta.getEnabled())) {
-            return ToolResult.fail(MessageConstant.TOOL_NOT_FOUND);
+            return recordStep(ctx, toolCode, "error",
+                    ToolResult.fail(MessageConstant.TOOL_NOT_FOUND), start);
         }
 
         // ---- 第 3 关：权限（返回自然语言，不抛异常） ----
@@ -85,7 +100,8 @@ public class ToolExecutor {
                     ctx.userId(), meta.getRequiredPermission(), toolCode);
             auditService.recordTool(ctx, toolCode, args, false, "权限不足",
                     System.currentTimeMillis() - start);
-            return ToolResult.fail(MessageConstant.NO_PERMISSION);
+            return recordStep(ctx, toolCode, "error",
+                    ToolResult.fail(MessageConstant.NO_PERMISSION), start);
         }
 
         // ---- 第 4 关：幂等 ----
@@ -94,7 +110,10 @@ public class ToolExecutor {
             String cached = redis.opsForValue().get(idemKey);
             if (cached != null) {
                 log.info("幂等命中，直接返回上次结果：{}", idemKey);
-                return JsonUtils.fromJson(cached, ToolResult.class);
+                ToolResult cachedResult = JsonUtils.fromJson(cached, ToolResult.class);
+                if (cachedResult != null) {
+                    return recordStep(ctx, toolCode, "ok", cachedResult, start);
+                }
             }
         }
 
@@ -103,7 +122,8 @@ public class ToolExecutor {
             String reason = buildApprovalReason(toolCode, args);
             auditService.recordTool(ctx, toolCode, args, true, "待审批",
                     System.currentTimeMillis() - start);
-            return ToolResult.needApproval(reason, args);
+            return recordStep(ctx, toolCode, "interrupted",
+                    ToolResult.needApproval(reason, args), start);
         }
 
         // ---- 第 6 关：执行（超时 + 有条件的重试） ----
@@ -117,6 +137,36 @@ public class ToolExecutor {
         auditService.recordTool(ctx, toolCode, args, result.success(),
                 result.message(), System.currentTimeMillis() - start);
 
+        return recordStep(ctx, toolCode, result.success() ? "ok" : "error", result, start);
+    }
+
+    /**
+     * 把工具执行结果写入运行步骤，并原样返回结果。
+     *
+     * <p>运行轨迹是旁路能力，记录失败不能覆盖或中断工具本身的结果。</p>
+     *
+     * @param ctx 执行上下文
+     * @param toolCode 工具编码
+     * @param status 步骤状态：ok/error/interrupted
+     * @param result 工具结果
+     * @param start 开始时间戳
+     * @return 原工具结果
+     */
+    private ToolResult recordStep(ToolContext ctx,
+                                  String toolCode,
+                                  String status,
+                                  ToolResult result,
+                                  long start) {
+        String detail = result.message();
+        if (result.needApproval() && result.approvalReason() != null) {
+            detail = result.approvalReason();
+        }
+        try {
+            stepRecorder.recordTool(ctx, toolCode, status, detail,
+                    Math.max(0L, System.currentTimeMillis() - start));
+        } catch (Exception e) {
+            log.warn("工具 {} 运行步骤记录失败，不影响执行结果：{}", toolCode, e.getMessage());
+        }
         return result;
     }
 

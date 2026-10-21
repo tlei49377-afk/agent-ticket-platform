@@ -20,10 +20,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuditServiceImpl implements AuditService {
 
-    /** 工具执行的动作码，与建表注释一致。 */
+    // 工具执行的动作码，与建表注释一致。
     private static final String ACTION_TOOL_EXEC = "TOOL_EXEC";
 
-    /** error_msg 列长度上限，超长截断避免整条审计写不进去。 */
+    // error_msg 列长度上限，超长截断避免整条审计写不进去。
     private static final int ERROR_MSG_MAX = 500;
 
     private final SysAuditLogMapper auditLogMapper;

@@ -6,4 +6,8 @@
     <select id="getByCode" resultType="com.atp.pojo.entity.agent.AgentMeta">
         SELECT * FROM agent WHERE code = #{code} AND deleted = 0 AND enabled = 1
     </select>
+
+    <select id="getById" resultType="com.atp.pojo.entity.agent.AgentMeta">
+        SELECT * FROM agent WHERE id = #{id} AND deleted = 0 AND enabled = 1
+    </select>
 </mapper>

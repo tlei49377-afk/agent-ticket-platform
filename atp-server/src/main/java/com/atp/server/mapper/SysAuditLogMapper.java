@@ -4,7 +4,8 @@ import com.atp.pojo.entity.sys.SysAuditLog;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
- * 审计日志访问。只增不改，是回溯"谁在什么时候做了什么"的依据。
+ * 审计日志访问。
+ * 只增不改，是回溯"谁在什么时候做了什么"的依据。
  */
 @Mapper
 public interface SysAuditLogMapper {

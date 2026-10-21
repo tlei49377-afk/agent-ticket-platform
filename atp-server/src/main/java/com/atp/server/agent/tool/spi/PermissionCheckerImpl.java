@@ -8,8 +8,7 @@ import org.springframework.stereotype.Component;
 /**
  * PermissionChecker 的 atp-server 实现。
  *
- * <p>复用阶段 1 的权限能力：{@link PermissionService#listCodesByUserId}
- * 内部已经是 PermissionMapper 查询 + Redis 缓存，这里只做一次包含判断。</p>
+ * 内部已经是 PermissionMapper 查询 + Redis 缓存，这里只做一次包含判断。
  */
 @Component
 @RequiredArgsConstructor
