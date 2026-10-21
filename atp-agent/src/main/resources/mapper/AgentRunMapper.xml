@@ -14,6 +14,10 @@
         SELECT * FROM agent_run WHERE run_no = #{runNo}
     </select>
 
+    <select id="getById" resultType="com.atp.pojo.entity.agent.AgentRun">
+        SELECT * FROM agent_run WHERE id = #{id}
+    </select>
+
     <update id="finish">
         UPDATE agent_run
         SET status = #{status},

@@ -25,6 +25,14 @@ public interface AgentRunMapper {
     AgentRun getByRunNo(@Param("runNo") String runNo);
 
     /**
+     * 按主键取运行记录。
+     *
+     * @param id 运行 ID
+     * @return 运行记录；不存在时返回 null
+     */
+    AgentRun getById(@Param("id") Long id);
+
+    /**
      * 收尾：写终态、输出、耗时、错误信息，ended_at 由 SQL 取 NOW()
      * @param id 运行记录 ID
      * @param status 终态：success/failed/cancelled

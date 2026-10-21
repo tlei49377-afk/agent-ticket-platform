@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atp.agent.mapper.AgentApprovalMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO agent_approval (run_id, session_id, step_seq, tool_code, arguments,
+                                    reason, status, expire_at)
+        VALUES (#{runId}, #{sessionId}, #{stepSeq}, #{toolCode}, CAST(#{arguments} AS JSON),
+                #{reason}, #{status}, #{expireAt})
+    </insert>
+
+    <select id="getById" resultType="com.atp.pojo.entity.agent.AgentApproval">
+        SELECT * FROM agent_approval WHERE id = #{id}
+    </select>
+
+    <select id="getVoById" resultType="com.atp.pojo.vo.agent.ApprovalVO">
+        SELECT a.id, a.run_id, a.session_id, a.step_seq, a.tool_code,
+               t.name AS tool_name, a.arguments, a.reason, a.status,
+               a.operator_id, a.operated_at, a.comment, a.expire_at, a.create_time
+        FROM agent_approval a
+        LEFT JOIN agent_tool t ON t.code = a.tool_code
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="listPage" resultType="com.atp.pojo.vo.agent.ApprovalVO">
+        SELECT a.id, a.run_id, a.session_id, a.step_seq, a.tool_code,
+               t.name AS tool_name, a.arguments, a.reason, a.status,
+               a.operator_id, a.operated_at, a.comment, a.expire_at, a.create_time
+        FROM agent_approval a
+        LEFT JOIN agent_tool t ON t.code = a.tool_code
+        <where>
+            <if test="status != null and status != ''">
+                a.status = #{status}
+            </if>
+        </where>
+        ORDER BY a.create_time DESC, a.id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*)
+        FROM agent_approval
+        <where>
+            <if test="status != null and status != ''">
+                status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <select id="listByRun" resultType="com.atp.pojo.vo.agent.ApprovalVO">
+        SELECT a.id, a.run_id, a.session_id, a.step_seq, a.tool_code,
+               t.name AS tool_name, a.arguments, a.reason, a.status,
+               a.operator_id, a.operated_at, a.comment, a.expire_at, a.create_time
+        FROM agent_approval a
+        LEFT JOIN agent_tool t ON t.code = a.tool_code
+        WHERE a.run_id = #{runId}
+        ORDER BY a.id DESC
+    </select>
+
+    <select id="getPendingByRunStepTool" resultType="com.atp.pojo.entity.agent.AgentApproval">
+        SELECT *
+        FROM agent_approval
+        WHERE run_id = #{runId}
+          AND step_seq = #{stepSeq}
+          AND tool_code = #{toolCode}
+          AND status = 'pending'
+        ORDER BY id DESC
+        LIMIT 1
+    </select>
+
+    <update id="decide">
+        UPDATE agent_approval
+        SET status = #{status},
+            operator_id = #{operatorId},
+            comment = #{comment},
+            operated_at = #{operatedAt}
+        WHERE id = #{id}
+          AND status = 'pending'
+    </update>
+
+    <update id="claimExecution">
+        UPDATE agent_approval
+        SET status = 'executing'
+        WHERE id = #{id}
+          AND status = 'approved'
+    </update>
+
+    <update id="finishExecution">
+        UPDATE agent_approval
+        SET status = #{status}
+        WHERE id = #{id}
+          AND status = 'executing'
+    </update>
+
+    <update id="expireOutdated">
+        UPDATE agent_approval
+        SET status = 'expired'
+        WHERE status = 'pending'
+          AND expire_at IS NOT NULL
+          AND expire_at &lt; #{now}
+    </update>
+</mapper>

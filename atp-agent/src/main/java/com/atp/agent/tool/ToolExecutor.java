@@ -57,7 +57,7 @@ public class ToolExecutor {
     private final RunStepRecorder stepRecorder;
 
     /**
-     * 按七道关执行一次工具调用。
+     * 按七道关执行一次普通工具调用。
      *
      * @param toolCode 工具编码
      * @param args 工具参数
@@ -69,7 +69,50 @@ public class ToolExecutor {
                               Map<String, Object> args,
                               ToolContext ctx,
                               Set<String> agentToolScope) {
+        return executeInternal(toolCode, args, ctx, agentToolScope, false, null);
+    }
 
+    /**
+     * 执行一张已经审批通过的写工具调用。
+     *
+     * <p>该入口只允许审批服务调用。审批单 ID 同时作为稳定的幂等作用域，
+     * 防止同一张审批单重复执行。</p>
+     *
+     * @param approvalId 审批单 ID
+     * @param toolCode 工具编码
+     * @param args 工具参数
+     * @param ctx 执行上下文
+     * @param agentToolScope 当前 Agent 被授权的工具集合
+     * @return 工具执行结果
+     */
+    public ToolResult executeApproved(String approvalId,
+                                      String toolCode,
+                                      Map<String, Object> args,
+                                      ToolContext ctx,
+                                      Set<String> agentToolScope) {
+        if (approvalId == null || approvalId.isBlank()) {
+            return ToolResult.fail("审批单号不能为空");
+        }
+        return executeInternal(toolCode, args, ctx, agentToolScope, true, approvalId);
+    }
+
+    /**
+     * 工具执行主流程。
+     *
+     * @param toolCode 工具编码
+     * @param args 工具参数
+     * @param ctx 执行上下文
+     * @param agentToolScope 当前 Agent 被授权的工具集合
+     * @param approvedExecution 是否为已审批执行
+     * @param approvalId 审批单 ID，普通调用时为空
+     * @return 工具执行结果
+     */
+    private ToolResult executeInternal(String toolCode,
+                                       Map<String, Object> args,
+                                       ToolContext ctx,
+                                       Set<String> agentToolScope,
+                                       boolean approvedExecution,
+                                       String approvalId) {
         long start = System.currentTimeMillis();
 
         // ---- 第 1 关：工具是否存在 ----
@@ -105,7 +148,10 @@ public class ToolExecutor {
         }
 
         // ---- 第 4 关：幂等 ----
-        String idemKey = IDEMPOTENT_PREFIX + ctx.idempotentKey(toolCode, JsonUtils.toJson(args));
+        String idemScope = approvedExecution
+                ? "approval:" + approvalId
+                : ctx.idempotentKey(toolCode, JsonUtils.toJson(args));
+        String idemKey = IDEMPOTENT_PREFIX + idemScope;
         if (Integer.valueOf(1).equals(meta.getIdempotent())) {
             String cached = redis.opsForValue().get(idemKey);
             if (cached != null) {
@@ -117,8 +163,8 @@ public class ToolExecutor {
             }
         }
 
-        // ---- 第 5 关：审批（写操作不执行，直接返回待审批） ----
-        if (Integer.valueOf(1).equals(meta.getNeedApproval())) {
+        // ---- 第 5 关：普通调用需要审批；审批执行入口跳过该关 ----
+        if (!approvedExecution && Integer.valueOf(1).equals(meta.getNeedApproval())) {
             String reason = buildApprovalReason(toolCode, args);
             auditService.recordTool(ctx, toolCode, args, true, "待审批",
                     System.currentTimeMillis() - start);
@@ -142,8 +188,6 @@ public class ToolExecutor {
 
     /**
      * 把工具执行结果写入运行步骤，并原样返回结果。
-     *
-     * <p>运行轨迹是旁路能力，记录失败不能覆盖或中断工具本身的结果。</p>
      *
      * @param ctx 执行上下文
      * @param toolCode 工具编码

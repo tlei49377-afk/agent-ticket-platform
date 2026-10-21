@@ -41,6 +41,9 @@ public class StatusConstant {
     /** 审批状态 */
     public static final String APPROVAL_PENDING  = "pending";
     public static final String APPROVAL_APPROVED = "approved";
+    public static final String APPROVAL_EXECUTING = "executing";
+    public static final String APPROVAL_EXECUTED = "executed";
+    public static final String APPROVAL_EXECUTION_FAILED = "execution_failed";
     public static final String APPROVAL_REJECTED = "rejected";
     public static final String APPROVAL_EXPIRED  = "expired";
 

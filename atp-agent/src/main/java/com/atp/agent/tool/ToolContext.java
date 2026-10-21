@@ -44,7 +44,23 @@ public record ToolContext(
      * @return 幂等键
      */
     public String idempotentKey(String toolCode, String argsJson) {
-        return runId + ":" + stepIndex + ":" + toolCode + ":"
-                + Integer.toHexString(argsJson.hashCode());
+        String safeJson = argsJson == null ? "" : argsJson;
+        return runId + ":" + stepIndex + ":" + toolCode + ":" + sha256(safeJson);
+    }
+
+    /**
+     * 计算参数 JSON 的 SHA-256，避免 String.hashCode 碰撞导致错误去重。
+     *
+     * @param text 待计算文本
+     * @return 十六进制摘要
+     */
+    private static String sha256(String text) {
+        try {
+            byte[] digest = java.security.MessageDigest.getInstance("SHA-256")
+                    .digest(text.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            return java.util.HexFormat.of().formatHex(digest);
+        } catch (java.security.NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 不可用", e);
+        }
     }
 }

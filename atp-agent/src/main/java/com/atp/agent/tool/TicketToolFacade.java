@@ -1,5 +1,6 @@
 package com.atp.agent.tool;
 
+import com.atp.agent.service.ApprovalService;
 import com.atp.agent.tool.spi.UsernameResolver;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
@@ -38,6 +39,9 @@ public class TicketToolFacade {
 
     // 当前会话 run 上下文存储。
     private final AgentRunContextStore runContextStore;
+
+    // 写操作审批单服务。
+    private final ApprovalService approvalService;
 
     /**
      * 查询工单列表。
@@ -318,6 +322,20 @@ public class TicketToolFacade {
                 args,
                 ctx,
                 scopeResolver.resolve(memoryId));
+
+        if (result.needApproval()) {
+            try {
+                Long approvalId = approvalService.createPending(
+                        runId, memoryId, step, toolCode, args, result.approvalReason());
+                if (approvalId != null) {
+                    return result.message() + "，审批单号：#" + approvalId
+                            + "。请主管在审批中心处理，不要重复调用该工具。";
+                }
+            } catch (Exception e) {
+                log.error("创建工具审批单失败：toolCode={}, runId={}", toolCode, runId, e);
+                return "该操作需要审批，但审批单创建失败，请稍后重试。";
+            }
+        }
         return result.message();
     }
 }
