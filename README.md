@@ -4,7 +4,7 @@
 
 ## 当前进度
 
-**阶段 0（需求与设计）、阶段 1（后端骨架）已完成**：库建好并灌入了初始化数据，5 个模块能构建，Web 层已经能登录、鉴权、发统一响应、带 traceId，另有 Actuator 与 OpenAPI 两个口子。业务接口本身从阶段 2 开始写。
+**阶段 0～3 与阶段 4 Lite 已完成**：后端骨架、工单与 SLA、LangChain4j Agent、11 个业务工具、SSE 对话、数据库持久化审批和审批后写工具执行均已接通。阶段 5 RAG、阶段 6 评测与可观测仍为后续工作。
 
 完整操作步骤见 `..\docs\05-项目二操作流程手册.md`。
 
@@ -16,6 +16,9 @@
 | 初始化数据 | 4 角色 / 13 权限 / 5 用户 / 7 分类 / 4 SLA 策略 / 15 工具 / 2 Agent / 100 条评测用例 |
 | Maven 骨架 | 父工程 + 5 个子模块，`mvn clean install` 通过 |
 | Web 基础设施 | 统一响应 `Result`、全局异常处理、JWT 登录与拦截器、`@RequirePermission` 权限切面（权限码缓存在 Redis） |
+| 阶段 2 | 工单 CRUD、分类、消息、状态机、SLA 计时与升级 |
+| 阶段 3 | LangChain4j Agent、记忆、工具七道关、11 个业务工具、SSE 对话、审计与运行步骤 |
+| 阶段 4 Lite | 写操作持久化审批、`executeApproved` 执行入口、审批中心 API、重复执行保护 |
 | 可观测与调试 | traceId 贯穿日志与 `X-Trace-Id` 响应头；Actuator（`/actuator/health`、`/actuator/prometheus`）；OpenAPI（`/v3/api-docs`，导入 Apifox 用） |
 
 ## 模块结构
@@ -24,7 +27,7 @@
 agent-ticket-platform        父工程（packaging=pom，只做依赖与版本管理）
 ├── atp-common               公共基础设施：统一响应、异常、常量、工具类
 ├── atp-pojo                 实体与 DTO / VO
-├── atp-agent                Agent 内核：工具、记忆、RAG、状态图
+├── atp-agent                Agent 内核：工具、记忆、审批、RAG
 ├── atp-eval                 评测执行器与指标计算
 └── atp-server               Web 层与启动模块（唯一有 @SpringBootApplication 的模块）
 ```

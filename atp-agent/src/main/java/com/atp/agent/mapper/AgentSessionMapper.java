@@ -39,6 +39,14 @@ public interface AgentSessionMapper {
     AgentSession getByMemoryId(@Param("memoryId") String memoryId);
 
     /**
+     * 按主键取会话。
+     *
+     * @param id 会话 ID
+     * @return 会话；不存在时返回 null
+     */
+    AgentSession getById(@Param("id") Long id);
+
+    /**
      * 某个用户的会话列表，按最后活跃倒序。
      *
      * @param userId 用户 ID

@@ -34,6 +34,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -133,6 +134,34 @@ class ToolExecutorTest {
 
         assertTrue(result.needApproval());
         verify(tool, never()).execute(any(), any());
+    }
+
+    /**
+     * 已审批入口应跳过审批拦截，真实执行写工具，并以审批单 ID 做幂等。
+     */
+    @Test
+    void 已审批_执行写工具且同一审批单只执行一次() {
+        AgentTool tool = mock(AgentTool.class);
+        when(tool.code()).thenReturn("ticket_assign");
+        when(tool.execute(any(), any()))
+                .thenReturn(ToolResult.ok(Map.of("ticketId", 1L), "转派成功"));
+        when(registry.get("ticket_assign")).thenReturn(tool);
+        when(toolMetaMapper.getByCode("ticket_assign"))
+                .thenReturn(meta("ticket_assign", 0, 1, 1, "ticket:assign"));
+        when(permissionChecker.has(1L, "ticket:assign")).thenReturn(true);
+
+        ToolContext ctx = new ToolContext(1L, "admin", "run-test-4", 0, "trace4", "1:4");
+        Map<String, Object> args = Map.of("ticketId", 1L, "assigneeId", 3L);
+
+        ToolResult first = executor.executeApproved(
+                "approval-1", "ticket_assign", args, ctx, Set.of("ticket_assign"));
+        ToolResult second = executor.executeApproved(
+                "approval-1", "ticket_assign", args, ctx, Set.of("ticket_assign"));
+
+        assertTrue(first.success());
+        assertFalse(first.needApproval());
+        assertEquals(first.message(), second.message());
+        verify(tool, times(1)).execute(args, ctx);
     }
 
     /**

@@ -20,6 +20,10 @@
         SELECT * FROM agent_session WHERE memory_id = #{memoryId} AND deleted = 0
     </select>
 
+    <select id="getById" resultType="com.atp.pojo.entity.agent.AgentSession">
+        SELECT * FROM agent_session WHERE id = #{id} AND deleted = 0
+    </select>
+
     <select id="listByUser" resultType="com.atp.pojo.vo.agent.SessionVO">
         SELECT memory_id, title, last_active_at
         FROM agent_session

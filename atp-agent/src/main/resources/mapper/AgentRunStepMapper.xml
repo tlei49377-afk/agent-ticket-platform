@@ -13,4 +13,8 @@
     <select id="listByRun" resultType="com.atp.pojo.entity.agent.AgentRunStep">
         SELECT * FROM agent_run_step WHERE run_id = #{runId} ORDER BY seq
     </select>
+
+    <select id="nextSeq" resultType="int">
+        SELECT COALESCE(MAX(seq), 0) + 1 FROM agent_run_step WHERE run_id = #{runId}
+    </select>
 </mapper>

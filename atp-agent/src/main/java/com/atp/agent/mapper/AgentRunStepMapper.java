@@ -25,4 +25,12 @@ public interface AgentRunStepMapper {
      * @return 步骤列表
      */
     List<AgentRunStep> listByRun(@Param("runId") Long runId);
+
+    /**
+     * 取下一次运行步骤序号。
+     *
+     * @param runId run ID
+     * @return 当前最大 seq 加一；空 run 返回 1
+     */
+    Integer nextSeq(@Param("runId") Long runId);
 }

@@ -529,7 +529,7 @@ CREATE TABLE agent_approval (
     tool_code    VARCHAR(64)  NOT NULL                COMMENT '待执行的工具',
     arguments    JSON             NULL                COMMENT '工具参数',
     reason       VARCHAR(500)     NULL                COMMENT '申请理由（模型给出）',
-    status       VARCHAR(16)  NOT NULL DEFAULT 'pending' COMMENT 'pending/approved/rejected/expired',
+    status       VARCHAR(16)  NOT NULL DEFAULT 'pending' COMMENT 'pending/approved/executing/executed/execution_failed/rejected/expired',
     operator_id  BIGINT           NULL                COMMENT '审批人',
     operated_at  DATETIME         NULL                COMMENT '审批时间',
     comment      VARCHAR(500)     NULL                COMMENT '审批意见',
