@@ -44,16 +44,16 @@
 | | 内容 |
 |---|---|
 | **前置** | 用户在对话页提问，且该 Agent 被授权使用 `kb_search` / `faq_search` |
-| **主流程** | 1. 意图判断为知识型问题<br>2. 状态图 `retrieve` 节点做混合检索（向量 + 关键词 + RRF 融合）<br>3. 召回片段按 `[1][2]` 编号拼进提示词<br>4. 模型基于片段组织答案，句末标注来源编号<br>5. `respond` 节点解析编号，映射回文档，返回结构化 `references`<br>6. 落库会话与消息，记录 token 与耗时 |
+| **主流程** | 1. 模型判断需要知识库，通过 `TicketToolFacade` 调用 `kb_search` / `faq_search`<br>2. `HybridRetriever` 做向量 + 关键词 + RRF 融合<br>3. 工具返回按 `[1][2]` 编号的资料片段和标题<br>4. 模型基于工具结果组织答案，句末保留来源编号<br>5. `kb_retrieval_log` 保存本次 run 的召回结果，引用接口按 runId 组装结构化 `references`<br>6. 落库会话与消息，记录 token 与耗时 |
 | **异常分支** | · 检索为空 → 转场景 4 或直接告知"资料里没提到"<br>· 向量库不可用 → 降级为不检索，用工具方式调用一次 `kb_search` 失败后如实告知<br>· 模型未标注引用 → 提示词强化，仍缺失则前端不显示引用区 |
-| **涉及技术** | RediSearch 混合检索、RRF、引用溯源、向量库降级 |
+| **涉及技术** | 普通 Agent 工具调用、RediSearch 混合检索、RRF、检索日志、引用溯源 |
 
 ### 场景 3 — AI 需要查数据
 
 | | 内容 |
 |---|---|
 | **前置** | 问题涉及业务数据（如"我上周的工单处理到哪了"） |
-| **主流程** | 1. 意图判断为查数据<br>2. `plan` 节点决策调用哪个工具（如 `ticket_query`）<br>3. `tool` 节点过七道关：存在性 → Agent 授权 → 权限 → 幂等 → 审批 → 执行（超时/重试）→ 审计<br>4. 工具返回 `ToolResult`，`message` 回灌给模型<br>5. 模型转述为用户可读的回答<br>6. 落 `agent_run_step` 与 `sys_audit_log` |
+| **主流程** | 1. 模型判断需要业务数据<br>2. 模型通过 `TicketToolFacade` 调用具体工具（如 `ticket_query`）<br>3. `ToolExecutor` 过七道关：存在性 → Agent 授权 → 权限 → 幂等 → 审批 → 执行（超时/重试）→ 审计<br>4. 工具返回 `ToolResult`，`message` 回灌给模型<br>5. 模型转述为用户可读的回答<br>6. 落 `agent_run_step` 与 `sys_audit_log` |
 | **异常分支** | · 工具超时 → 返回"操作超时，请稍后再试"<br>· 无权限 → 返回"你没有执行该操作的权限"（**自然语言，不抛异常**）<br>· 模型调了不存在的工具 → 返回"工具不存在"<br>· 匹配到多个候选（如两个"张三"）→ 返回候选列表让用户确认，**绝不批量操作** |
 | **涉及技术** | 工具执行七件套、`ToolContext` 显式传参、结构化返回 |
 
@@ -62,9 +62,9 @@
 | | 内容 |
 |---|---|
 | **前置** | 用户说"帮我把这个工单转给张三"，且该 Agent 被授权使用 `ticket_assign` |
-| **主流程** | 1. 模型按提示词规则**先复述**："我准备把工单 TK... 转派给张三，确认吗？"<br>2. 用户确认后，模型发起 `ticket_assign` 调用<br>3. `ToolExecutor` 第 5 关判断 `need_approval = 1` → **不执行**，返回 `needApproval = true`<br>4. `ToolNode` 落 `agent_approval`（状态 `pending`），图进入 `approval` 节点<br>5. `approval` 节点发现还是 `pending` → 状态置 `waiting_approval`，图**中断**<br>6. `agent_run.status = waiting_approval`<br>7. 主管在审批中心看到待办 → 点同意<br>8. `ApprovalService` 幂等更新审批状态 → **异步用 `runId` 恢复图**<br>9. 图从 checkpoint 续跑 → `approval → tool` → 真正执行转派<br>10. `respond` 节点汇报结果 |
-| **异常分支** | · 审批被拒 → 图走 `approval → respond`，如实告知"该操作未获批准"<br>· 审批超时 24 小时 → 自动置 `expired`，图不再恢复<br>· 两个主管同时点同意 → 带条件的 UPDATE 保证只有一次生效<br>· **审批期间服务重启** → checkpoint 在，恢复后从断点续跑，**不重放前面的检索与工具调用** |
-| **涉及技术** | LangGraph4j 状态图、checkpoint 落 MySQL、人工中断、幂等、异步恢复 + traceId 传递 |
+| **主流程** | 1. 模型按提示词先复述：“我准备把工单 TK... 转派给张三，确认吗？”<br>2. 用户确认后，模型发起 `ticket_assign` 调用<br>3. `ToolExecutor` 判断 `need_approval = 1`，不执行，返回 `needApproval = true`<br>4. `TicketToolFacade` 创建 `agent_approval`，状态 `pending`<br>5. 主管在审批中心看到待办并点同意<br>6. `ApprovalService.decide` 用条件更新把状态改为 `approved`<br>7. 前端调用 `/approvals/{id}/resume`<br>8. `ApprovalService` 用条件更新抢占为 `executing`，调用 `ToolExecutor.executeApproved`<br>9. 原写工具真正执行，审批状态写为 `executed` 或 `execution_failed`<br>10. 执行结果写入 `agent_message` |
+| **异常分支** | · 审批被拒 → 状态 `rejected`，写一条“审批已驳回”的 AI 消息<br>· 审批超时 30 分钟 → 巡检任务置 `expired`<br>· 两个主管同时点同意 → `WHERE status = 'pending'` 的条件更新只允许一个成功<br>· **审批期间服务重启** → 审批单和原始工具参数都在 MySQL，重启后仍可 `resume`，但不会恢复模型推理 |
+| **涉及技术** | 数据库审批状态机、条件更新、审批单幂等作用域、`executeApproved`、traceId 传递 |
 
 ### 场景 5 — SLA 超期巡检
 
@@ -90,7 +90,7 @@
 | **写工具重试** | **0 次** | 重试会造成重复改数据 |
 | 幂等键 TTL | 24 小时 | |
 | 会话窗口 | 最近 30 条消息 | 工具结果消息也占额度 |
-| 审批有效期 | 24 小时 | 超时自动作废 |
+| 审批有效期 | 30 分钟 | 超时自动作废 |
 | 单用户单日成本上限 | 默认 5 元 | 超出后拒绝新会话 |
 | 密码存储 | BCrypt | 不用 MD5 |
 | 附件上限 | 20 MB / 个 | 扩展名白名单 |
@@ -118,11 +118,11 @@
 | SLA 策略（SLA Policy） | 按优先级定义的响应/解决时限规则 |
 | Agent | 一组提示词 + 工具集 + 知识库范围的可配置智能体 |
 | 会话（Session） | 用户与某个 Agent 的一段连续对话 |
-| 运行（Run） | 一次 Agent 执行的完整轨迹，可中断可恢复 |
+| 运行（Run） | 一次 Agent 执行的完整轨迹；写操作可在审批单处暂停，审批后执行工具 |
 | 工具（Tool） | Agent 能调用的一个原子能力 |
 | 审批（Approval） | 写操作执行前的人工确认 |
 | 幂等键（Idempotency Key） | 保证同一操作重复请求只执行一次 |
-| checkpoint | 状态图执行过程中的状态快照，用于断点续跑 |
+| checkpoint | LangGraph4j 的可选演进能力；当前阶段 4 Lite 不使用 |
 | 混合检索 | 向量检索 + 关键词检索并行，再用 RRF 融合 |
 | RRF | Reciprocal Rank Fusion，按排名融合多路检索结果 |
 

@@ -1,3 +1,19 @@
+> ⚠️ **当前实现说明（2026-10-21）**：项目已选择「阶段 4 Lite」——使用数据库审批状态闭环，不实现 LangGraph4j 状态图、checkpoint 和图中断恢复。本文保留为后续可选演进设计，不代表当前代码已实现这些节点。
+## 当前实现：阶段 4 Lite
+
+```text
+写工具调用
+-> ToolExecutor 返回 needApproval
+-> TicketToolFacade 创建 agent_approval(pending)
+-> ApprovalService.decide: pending -> approved/rejected
+-> ApprovalService.resume: approved -> executing
+-> ToolExecutor.executeApproved
+-> executed / execution_failed
+```
+
+当前实现的重点是审批状态持久化、重复审批保护和重复执行保护，不包含节点编排、checkpoint 和模型推理恢复。
+
+
 # Agent 状态图
 
 > 状态图是 Agent 和"聊天机器人"的分界线。没有图，模型只能靠提示词自己决定下一步，
