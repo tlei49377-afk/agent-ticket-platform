@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atp.agent.mapper.KbFaqMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO kb_faq (question, similar_questions, answer, category, vector_id, content_hash, status)
+        VALUES (#{question}, #{similarQuestions}, #{answer}, #{category}, #{vectorId}, #{contentHash}, #{status})
+    </insert>
+
+    <select id="listEnabled" resultType="com.atp.pojo.entity.kb.KbFaq">
+        SELECT * FROM kb_faq WHERE deleted = 0 AND status = 1 ORDER BY id
+    </select>
+
+    <select id="countByHash" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM kb_faq WHERE content_hash = #{contentHash}
+    </select>
+
+    <update id="increaseHit">
+        UPDATE kb_faq SET hit_count = hit_count + 1 WHERE id = #{id}
+    </update>
+</mapper>

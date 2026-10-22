@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atp.agent.mapper.KbDocumentMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO kb_document (title, doc_type, source_url, file_path, status, version, uploaded_by)
+        VALUES (#{title}, #{docType}, #{sourceUrl}, #{filePath}, #{status}, #{version}, #{uploadedBy})
+    </insert>
+
+    <select id="getById" resultType="com.atp.pojo.entity.kb.KbDocument">
+        SELECT * FROM kb_document WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="page" resultType="com.atp.pojo.vo.kb.KbDocumentVO">
+        SELECT id, title, doc_type, status, chunk_count, version, error_msg, create_time
+        FROM kb_document
+        WHERE deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND title LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        <if test="docType != null and docType != ''">
+            AND doc_type = #{docType}
+        </if>
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        ORDER BY id DESC
+    </select>
+
+    <select id="listByStatus" resultType="com.atp.pojo.entity.kb.KbDocument">
+        SELECT * FROM kb_document WHERE deleted = 0 AND status = #{status} ORDER BY id
+    </select>
+
+    <update id="updateStatus">
+        UPDATE kb_document
+        SET status = #{status},
+            chunk_count = COALESCE(#{chunkCount}, chunk_count),
+            error_msg = #{errorMsg}
+        WHERE id = #{id}
+    </update>
+
+    <update id="delete">
+        UPDATE kb_document SET deleted = 1 WHERE id = #{id}
+    </update>
+</mapper>

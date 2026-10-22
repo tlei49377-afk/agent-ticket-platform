@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public class SysUser {
     private Long id; // 主键
     private String username; // 登录名
-    @JsonIgnore
+    @JsonIgnore // 表示在序列化时忽略该字段
     private String password; // 密码（BCrypt 哈希），永远不返回给前端
     private String name; // 姓名
     private String phone; // 手机号

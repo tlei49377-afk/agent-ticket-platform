@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atp.agent.mapper.KbRetrievalLogMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO kb_retrieval_log (query_text, run_id, mode, top_k,
+                                      result_ids, result_scores, top1_score, cost_ms)
+        VALUES (#{queryText}, #{runId}, #{mode}, #{topK},
+                #{resultIds}, #{resultScores}, #{top1Score}, #{costMs})
+    </insert>
+
+    <select id="listByRun" resultType="com.atp.pojo.entity.kb.KbRetrievalLog">
+        SELECT * FROM kb_retrieval_log WHERE run_id = #{runId} ORDER BY id
+    </select>
+
+    <select id="getLatestByRun" resultType="com.atp.pojo.entity.kb.KbRetrievalLog">
+        SELECT *
+        FROM kb_retrieval_log
+        WHERE run_id = #{runId}
+        ORDER BY id DESC
+        LIMIT 1
+    </select>
+</mapper>
