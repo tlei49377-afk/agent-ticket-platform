@@ -1,7 +1,8 @@
 package com.atp.agent.service;
 
 /**
- * Agent 运行记录服务。一次用户提问对应一条 agent_run。
+ * Agent 运行记录服务。
+ * 一次用户提问对应一条 agent_run。
  */
 public interface AgentRunService {
 

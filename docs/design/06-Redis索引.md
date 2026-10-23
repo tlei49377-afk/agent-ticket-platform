@@ -47,7 +47,7 @@ langchain4j:
       port: 6380
       index-name: embedding-index
       prefix: "embedding:"
-      password: 123456
+      password: ""
       dimension: 1024
 ```
 
@@ -59,15 +59,15 @@ langchain4j:
 
 ```powershell
 docker start redis-vector
-& 'E:\Redis\redis-cli.exe' -p 6380 -a 123456 PING
-& 'E:\Redis\redis-cli.exe' -p 6380 -a 123456 MODULE LIST
+& 'E:\Redis\redis-cli.exe' -p 6380 PING
+& 'E:\Redis\redis-cli.exe' -p 6380 MODULE LIST
 ```
 
 启动应用后检查：
 
 ```powershell
-& 'E:\Redis\redis-cli.exe' -p 6380 -a 123456 FT._LIST
-& 'E:\Redis\redis-cli.exe' -p 6380 -a 123456 FT.INFO embedding-index
+& 'E:\Redis\redis-cli.exe' -p 6380 FT._LIST
+& 'E:\Redis\redis-cli.exe' -p 6380 FT.INFO embedding-index
 ```
 
 预期：

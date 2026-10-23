@@ -7,7 +7,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * 会话生命周期。memoryId 一律从接口传进来，不在 Service 里从 ThreadLocal 取。
+ * 会话生命周期。
+ * memoryId 一律从接口传进来，不在 Service 里从 ThreadLocal 取。
  */
 public interface AgentSessionService {
 

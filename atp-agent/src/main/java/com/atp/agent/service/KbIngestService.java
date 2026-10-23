@@ -36,9 +36,9 @@ import java.util.Set;
 /**
  * 知识库文档入库服务。
  *
- * <p>负责文件解析、分块、内容去重、向量化和分块元数据落库。外部 embedding
+ * 负责文件解析、分块、内容去重、向量化和分块元数据落库。外部 embedding
  * 调用不能包在一个长数据库事务中，因此这里通过状态字段显式推进：
- * {@code pending -> processing -> ready/failed}。</p>
+ * {@code pending -> processing -> ready/failed}。
  */
 @Service
 @Slf4j
@@ -185,8 +185,8 @@ public class KbIngestService {
     /**
      * 从本地文件系统加载文档。
      *
-     * <p>上传后的文件是普通磁盘文件，不是 classpath 资源，不能用
-     * {@code ClassPathDocumentLoader}。</p>
+     * 上传后的文件是普通磁盘文件，不是 classpath 资源，不能用
+     * {@code ClassPathDocumentLoader}。<
      *
      * @param doc 文档实体
      * @return LangChain4j 文档对象

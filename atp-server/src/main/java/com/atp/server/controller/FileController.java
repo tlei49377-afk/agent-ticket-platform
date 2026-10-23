@@ -34,7 +34,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class FileController {
 
-    /** 扩展名白名单。不在名单里的一律拒绝，别信前端传来的文件名 */
+    // 扩展名白名单。不在名单里的一律拒绝，别信前端传来的文件名
     private static final Set<String> ALLOWED_EXT =
             Set.of("jpg", "jpeg", "png", "gif", "pdf", "txt", "md", "docx", "xlsx");
 

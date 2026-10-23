@@ -290,6 +290,41 @@ public class TicketToolFacade {
     }
 
     /**
+     * 检索知识库。
+     *
+     * @param memoryId 会话记忆 ID
+     * @param query 检索问题
+     * @param topK 返回条数
+     * @return 给模型转述的检索结果
+     */
+    @Tool(name = "kb_search", value = "检索售后知识库。涉及政策、流程、规则时先调用。")
+    public String kbSearch(
+            @ToolMemoryId String memoryId,
+            @P(value = "检索问题", required = true) String query,
+            @P(value = "返回条数，默认 5，最大 10", required = false) Integer topK) {
+        Map<String, Object> args = new LinkedHashMap<>();
+        args.put("query", query);
+        args.put("topK", topK == null ? 5 : topK);
+        return dispatch("kb_search", args, memoryId);
+    }
+
+    /**
+     * 查询常见问题。
+     *
+     * @param memoryId 会话记忆 ID
+     * @param question 用户问题
+     * @return 给模型转述的 FAQ 结果
+     */
+    @Tool(name = "faq_search", value = "匹配售后常见问题，适合标准问答。")
+    public String faqSearch(
+            @ToolMemoryId String memoryId,
+            @P(value = "用户问题", required = true) String question) {
+        Map<String, Object> args = new LinkedHashMap<>();
+        args.put("question", question);
+        return dispatch("faq_search", args, memoryId);
+    }
+
+    /**
      * 解析调用身份和 run 上下文，并交给统一执行器。
      *
      * @param toolCode 工具编码

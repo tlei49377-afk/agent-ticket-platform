@@ -29,6 +29,22 @@
         SELECT COUNT(*) FROM kb_chunk WHERE document_id = #{documentId}
     </select>
 
+    <select id="listByVectorIds" resultType="com.atp.pojo.entity.kb.KbChunk">
+        SELECT * FROM kb_chunk
+        WHERE vector_id IN
+        <foreach collection="vectorIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="listByIds" resultType="com.atp.pojo.entity.kb.KbChunk">
+        SELECT * FROM kb_chunk
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
     <delete id="deleteByDocument">
         DELETE FROM kb_chunk WHERE document_id = #{documentId}
     </delete>

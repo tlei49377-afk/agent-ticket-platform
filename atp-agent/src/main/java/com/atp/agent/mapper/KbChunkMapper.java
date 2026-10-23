@@ -37,6 +37,22 @@ public interface KbChunkMapper {
     List<String> filterExistingHashes(@Param("hashes") List<String> hashes);
 
     /**
+     * 按向量主键批量查询分块。
+     *
+     * @param vectorIds 向量库主键列表，调用方必须保证非空
+     * @return 对应分块
+     */
+    List<KbChunk> listByVectorIds(@Param("vectorIds") List<String> vectorIds);
+
+    /**
+     * 按主键批量查询分块。
+     *
+     * @param ids 分块 ID 列表，调用方必须保证非空
+     * @return 对应分块
+     */
+    List<KbChunk> listByIds(@Param("ids") List<Long> ids);
+
+    /**
      * 统计一个文档当前拥有的分块数。
      *
      * @param documentId 文档 ID
