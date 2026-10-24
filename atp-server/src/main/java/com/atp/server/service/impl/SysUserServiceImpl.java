@@ -5,8 +5,11 @@ import com.atp.common.exception.BaseException;
 import com.atp.pojo.dto.sys.LoginDTO;
 import com.atp.pojo.entity.sys.SysUser;
 import com.atp.pojo.vo.sys.LoginVO;
+import com.atp.pojo.vo.sys.UserProfileVO;
+import com.atp.pojo.vo.sys.UserVO;
 import com.atp.server.mapper.SysUserMapper;
 import com.atp.server.properties.JwtProperties;
+import com.atp.server.service.PermissionService;
 import com.atp.server.service.SysUserService;
 import com.atp.server.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +18,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+/**
+ * 系统用户服务实现。
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -26,12 +33,15 @@ public class SysUserServiceImpl implements SysUserService {
 
     private final JwtProperties jwtProperties;
 
+    private final PermissionService permissionService;
+
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     /**
-     * 校验用户名密码，通过后签发令牌并更新最后登录时间
-     * @param dto
-     * @return
+     * 校验用户名密码，通过后签发令牌并更新最后登录时间。
+     *
+     * @param dto 登录参数
+     * @return 登录结果
      */
     @Override
     public LoginVO login(LoginDTO dto) {
@@ -55,5 +65,37 @@ public class SysUserServiceImpl implements SysUserService {
 
         log.info("登录成功，userId={}", user.getId());
         return new LoginVO(user.getId(), user.getUsername(), user.getName(), token);
+    }
+
+    /**
+     * 查询当前登录人的角色和权限码。
+     *
+     * @param userId 当前用户 ID
+     * @return 用户资料
+     */
+    @Override
+    public UserProfileVO currentUser(Long userId) {
+        SysUser user = sysUserMapper.getById(userId);
+        if (user == null) {
+            throw new BaseException(MessageConstant.USER_NOT_FOUND);
+        }
+
+        UserProfileVO profile = new UserProfileVO();
+        profile.setId(user.getId());
+        profile.setUsername(user.getUsername());
+        profile.setName(user.getName());
+        profile.setRoles(sysUserMapper.listRoleCodesByUserId(userId));
+        profile.setPermissions(permissionService.listCodesByUserId(userId));
+        return profile;
+    }
+
+    /**
+     * 查询全部未删除用户，供工单指派下拉使用。
+     *
+     * @return 用户列表
+     */
+    @Override
+    public List<UserVO> listAllUsers() {
+        return sysUserMapper.listUsers(null, null);
     }
 }

@@ -18,6 +18,13 @@
         SELECT * FROM agent_run WHERE id = #{id}
     </select>
 
+    <select id="getLatestBySessionId" resultType="com.atp.pojo.entity.agent.AgentRun">
+        SELECT * FROM agent_run
+        WHERE session_id = #{sessionId}
+        ORDER BY id DESC
+        LIMIT 1
+    </select>
+
     <update id="finish">
         UPDATE agent_run
         SET status = #{status},
@@ -28,3 +35,4 @@
         WHERE id = #{id}
     </update>
 </mapper>
+

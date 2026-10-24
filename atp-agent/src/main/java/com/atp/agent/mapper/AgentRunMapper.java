@@ -33,6 +33,14 @@ public interface AgentRunMapper {
     AgentRun getById(@Param("id") Long id);
 
     /**
+     * 某个会话最近一次运行，前端在流式回答结束后用它定位引用与审批。
+     *
+     * @param sessionId 会话 ID
+     * @return 最近一次运行；没有运行时返回 null
+     */
+    AgentRun getLatestBySessionId(@Param("sessionId") Long sessionId);
+
+    /**
      * 收尾：写终态、输出、耗时、错误信息，ended_at 由 SQL 取 NOW()
      * @param id 运行记录 ID
      * @param status 终态：success/failed/cancelled
@@ -47,3 +55,4 @@ public interface AgentRunMapper {
                @Param("latencyMs") Integer latencyMs,
                @Param("errorMsg") String errorMsg);
 }
+

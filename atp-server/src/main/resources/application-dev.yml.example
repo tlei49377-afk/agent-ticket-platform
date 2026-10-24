@@ -60,6 +60,8 @@ langchain4j:
       prefix: "embedding:"
       password: your-redis-password
       dimension: 1024
+      metadata-keys:
+        - doc_title
 
 # 外部系统（项目一）
 external:
@@ -77,3 +79,4 @@ atp.agent:
   idempotent-ttl-hours: 24
   approval-expire-hours: 24
   daily-cost-limit: 5.00
+
