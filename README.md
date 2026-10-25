@@ -172,8 +172,8 @@ flowchart LR
 ### 部署边界
 
 ```text
-agent-ticket-platform     后端仓库
-atp-reference-web         前端工程
+agent-ticket-platform     前后端单仓库
+web                       前端工程
 sky-take-out - 副本       可选外部业务系统，不参与当前主线启动
 ```
 
@@ -453,7 +453,7 @@ WSL 临时模式：
 
 ## 模块与目录
 
-### Maven 模块
+### 仓库与模块
 
 ```text
 agent-ticket-platform
@@ -461,7 +461,11 @@ agent-ticket-platform
 ├── atp-pojo         实体、DTO、VO、查询对象
 ├── atp-agent        Agent 内核、工具契约、记忆、审批、RAG
 ├── atp-eval         评测模块
-└── atp-server       Web 接口、业务工具实现、启动模块
+├── atp-server       Web 接口、业务工具实现、启动模块
+├── web              Vue 3 前端工程
+├── docs             设计文档、知识库源文件和截图
+├── sql              建库和初始化数据
+└── tools            演示数据与知识库脚本
 ```
 
 ### 关键后端目录
@@ -642,8 +646,8 @@ atp-server
 ### 6. 启动前端
 
 ```powershell
-cd 'E:\Java\java_code\atp-reference-web'
-npm install
+cd '.\web'
+npm ci
 npm run dev
 ```
 
@@ -855,7 +859,7 @@ mvn -pl atp-server -am test `
 ### 前端构建
 
 ```powershell
-cd 'E:\Java\java_code\atp-reference-web'
+cd '.\web'
 npm run build
 ```
 
@@ -971,6 +975,7 @@ docker exec redis-vector redis-cli MODULE LIST
 
 ## 文档索引
 
+- [前端运行说明](web/README.md)
 - [知识库操作手册](docs/09-知识库操作手册.md)
 - [外部业务系统接入与切换手册](docs/10-外部业务系统接入与切换手册.md)
 - [Redis 索引设计](docs/design/06-Redis索引.md)
@@ -997,3 +1002,5 @@ E:\Java\java_code\docs\05-项目二操作流程手册.md
 ```
 
 项目的目标不是替代客服，而是让 Agent 成为可审计、可审批、可追踪的客服执行助手。
+
+

@@ -1,0 +1,107 @@
+/* ============================================================
+   全局样式与主题变量
+   ------------------------------------------------------------
+   整站颜色只在这里定义一次，其它文件一律引用变量，
+   想换配色只改这一段，不用去每个页面里翻。
+   ============================================================ */
+
+:root {
+  /* 主文字色：深灰而不是纯黑，长时间看表格不刺眼 */
+  --atp-text: #333333;
+  --atp-text-weak: #6b6b6b;
+  --atp-text-mute: #9a9a9a;
+  --atp-border: #e6e6e6;
+  --atp-bg: #f4f4f5;
+  --atp-card: #ffffff;
+
+  /* 品牌色用暖橙，替换掉 Element Plus 默认的蓝 */
+  --atp-primary: #e8833a;
+  --atp-primary-dark: #cf6f2b;
+  --atp-primary-soft: #fdf1e7;
+
+  /* 侧边栏：深灰底 + 橙色高亮 */
+  --atp-side-bg: #333333;
+  --atp-side-hover: #3d3d3d;
+  --atp-side-active: #454545;
+  --atp-side-text: #d6d6d6;
+  --atp-side-text-active: #ffb066;
+
+  /* 把 Element Plus 自己的颜色变量也改掉，
+     否则按钮、开关、链接还会是蓝的 */
+  --el-color-primary: #e8833a;
+  --el-color-primary-light-3: #eea26c;
+  --el-color-primary-light-5: #f3bb92;
+  --el-color-primary-light-7: #f8d4b8;
+  --el-color-primary-light-8: #fae0cb;
+  --el-color-primary-light-9: #fdf1e7;
+  --el-color-primary-dark-2: #cf6f2b;
+  --el-text-color-primary: #333333;
+  --el-text-color-regular: #4d4d4d;
+  --el-border-color: #e6e6e6;
+  --el-font-size-base: 14px;
+}
+
+html, body, #app {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
+  color: var(--atp-text);
+  background: var(--atp-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 页面里通用的小标签，例如工单状态、优先级、审批状态 */
+.atp-tag {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.atp-page {
+  padding: 16px 18px 24px;
+}
+
+.atp-page-title {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--atp-text);
+}
+
+.atp-page-desc {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--atp-text-weak);
+}
+
+.atp-card {
+  background: var(--atp-card);
+  border: 1px solid var(--atp-border);
+  border-radius: 6px;
+}
+
+.atp-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.atp-empty {
+  padding: 28px 0;
+  text-align: center;
+  color: var(--atp-text-mute);
+  font-size: 13px;
+}
+
+/* 表格和卡片统一圆角，避免 Element 默认方角 */
+.el-card, .el-table, .el-table__inner-wrapper {
+  border-radius: 6px;
+}
