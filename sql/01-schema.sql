@@ -598,8 +598,12 @@ CREATE TABLE eval_run (
     status         VARCHAR(16)  NOT NULL DEFAULT 'running' COMMENT 'running/success/failed',
     total_cases    INT          NOT NULL DEFAULT 0      COMMENT '用例总数',
     passed_cases   INT          NOT NULL DEFAULT 0      COMMENT '通过数',
+    pass_rate      DECIMAL(6,4)     NULL                COMMENT '通过率',
     tool_hit_rate     DECIMAL(6,4)  NULL COMMENT '工具命中率',
     keyword_hit_rate  DECIMAL(6,4)  NULL COMMENT '关键词命中率',
+    approval_match_rate DECIMAL(6,4) NULL COMMENT '审批触发匹配率',
+    no_tool_rate      DECIMAL(6,4)  NULL COMMENT '边界用例无工具调用率',
+    avg_tool_calls    DECIMAL(6,2)  NULL COMMENT '平均工具调用次数',
     doc_recall        DECIMAL(6,4)  NULL COMMENT '文档召回率',
     mrr               DECIMAL(6,4)  NULL COMMENT 'MRR',
     avg_faithfulness  DECIMAL(4,2)  NULL COMMENT '平均忠实度',
@@ -643,3 +647,5 @@ CREATE TABLE eval_result (
 /* ==========================================================================
    结束
    ========================================================================== */
+
+
