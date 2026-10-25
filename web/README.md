@@ -89,6 +89,18 @@ npm run preview
 | `/approvals` | 审批中心 | `ticket:approve` |
 | `/kb` | 知识库检索 | `kb:read` |
 
+## 品牌资源
+
+```text
+public/
+├── brand-logo.svg       页面内品牌图标
+├── favicon.svg          浏览器 SVG favicon
+├── favicon.ico          多尺寸 ICO
+├── apple-touch-icon.png iOS 主屏图标
+├── logo-192.png         192px 品牌图
+└── logo-512.png         512px 品牌图
+```
+
 ## 目录结构
 
 ```text
@@ -124,3 +136,4 @@ lisi       客服
 wangwu     客服
 zhaoliu    提交人
 ```
+

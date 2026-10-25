@@ -2,7 +2,7 @@
   <div class="atp-login">
     <div class="atp-login-card">
       <div class="atp-login-brand">
-        <div class="atp-login-logo">AT</div>
+        <img class="atp-login-logo" src="/brand-logo.svg" alt="智能工单 Agent 平台" />
         <div>
           <div class="atp-login-title">智能工单 Agent 平台</div>
           <div class="atp-login-sub">Agent Ticket Platform · 智能工单与审批</div>
@@ -184,5 +184,19 @@ async function submit() {
   margin-left: 4px;
   font-size: 11px;
 }
+
+/* 登录页品牌图标：保持图标原始比例，使用圆角而非裁成圆形 */
+.atp-login-logo {
+  width: 50px;
+  height: 50px;
+  flex: 0 0 50px;
+  display: block;
+  object-fit: contain;
+  border-radius: 14px;
+  background: transparent;
+  box-shadow: 0 10px 24px rgba(48, 36, 27, 0.22), 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
 </style>
+
+
 

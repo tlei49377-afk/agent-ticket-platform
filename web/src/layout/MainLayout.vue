@@ -2,7 +2,7 @@
   <el-container class="atp-layout">
     <el-aside width="220px" class="atp-aside">
       <div class="atp-brand">
-        <div class="atp-brand-logo">AT</div>
+        <img class="atp-brand-logo" src="/brand-logo.svg" alt="智能工单 Agent 平台" />
         <div class="atp-brand-text">
           <div class="atp-brand-name">智能工单平台</div>
           <div class="atp-brand-sub">Agent Ticket Platform</div>
@@ -166,5 +166,19 @@ async function onCommand(command) {
   padding: 0;
   overflow-y: auto;
 }
+
+/* 品牌图标：使用生成的 SVG，不显示旧的 AT 渐变圆 */
+.atp-brand-logo {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: block;
+  object-fit: contain;
+  border-radius: 12px;
+  background: transparent;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
 </style>
+
+
 
