@@ -537,13 +537,14 @@ atp-server/src/main/java/com/atp/server/
 
 ![工单管理](docs/screenshots/tickets-seeded.png)
 
-### 知识库检索
+### 知识库文档管理与检索
 
-- hybrid / vector / keyword；
-- RRF 融合；
-- 返回文档标题、分块和分数。
+- 全部知识文档列表、状态和分块数；
+- PDF / Markdown / TXT 文件导入；
+- 完整正文与分块预览；
+- hybrid / vector / keyword 检索和 RRF 融合。
 
-![知识库检索](docs/screenshots/kb-seeded.png)
+![知识库文档管理与检索](docs/screenshots/kb-seeded.png)
 
 ### 审批中心
 
@@ -1009,6 +1010,7 @@ E:\Java\java_code\docs\05-项目二操作流程手册.md
 ```
 
 项目的目标不是替代客服，而是让 Agent 成为可审计、可审批、可追踪的客服执行助手。
+
 
 
 
