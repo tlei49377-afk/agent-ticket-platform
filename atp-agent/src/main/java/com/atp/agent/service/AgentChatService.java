@@ -68,7 +68,7 @@ public class AgentChatService {
         StringBuilder output = new StringBuilder();
         AtomicBoolean finished = new AtomicBoolean(false);
 
-        return Flux.defer(() -> ticketAgentService.chat(memoryId, message))
+        return Flux.defer(() -> ticketAgentService.chat(memoryId, enrichProgressQuestion(message)))
                 .doOnNext(output::append)
                 .doOnComplete(() -> {
                     if (finished.compareAndSet(false, true)) {
@@ -163,6 +163,51 @@ public class AgentChatService {
     }
 
     /**
+     * 对“完成了吗”“处理进度”等问题追加一次强制工具查询指令。
+     *
+     * <p>模型可能沿用历史回答里的旧状态，因此这类问题不能只依赖系统提示。
+     * 在用户原文前追加本轮指令，要求模型必须查询数据库后再回答；原始消息
+     * 仍然单独落库，不会被这段内部指令污染。</p>
+     *
+     * @param message 用户原始消息
+     * @return 发给模型的增强消息
+     */
+    private String enrichProgressQuestion(String message) {
+        if (message == null || message.isBlank()) {
+            return message;
+        }
+        if (!isProgressQuestion(message)) {
+            return message;
+        }
+        return "【本轮强制规则】用户正在询问工单进度。必须先调用 ticket_query；"
+                + "如果已有工单号，则调用 ticket_detail。必须依据本次工具查询到的最新状态回答。"
+                + "不得使用历史对话、上一轮回答、审批状态或旧工具结果判断是否完成。"
+                + "只有“已解决”或“已关闭”才算完成，其他状态要明确说明尚未完成及当前状态。\n"
+                + "用户原问题：" + message;
+    }
+
+    /**
+     * 判断一句话是否在询问工单进度。
+     *
+     * @param message 用户消息
+     * @return 是否属于进度问题
+     */
+    private boolean isProgressQuestion(String message) {
+        String normalized = message.replaceAll("\\s+", "");
+        return normalized.contains("完成了吗")
+                || normalized.contains("完成了没")
+                || normalized.contains("完成没有")
+                || normalized.contains("处理得怎么样")
+                || normalized.contains("处理怎么样")
+                || normalized.contains("什么状态")
+                || normalized.contains("现在状态")
+                || normalized.contains("有没有解决")
+                || normalized.contains("解决了没有")
+                || normalized.contains("进度")
+                || normalized.contains("到哪一步");
+    }
+
+    /**
      * 用“字符数 / 4”估算 token，拿不到 TokenUsage 时作为兜底值。
      *
      * @param text 待估算文本
@@ -175,3 +220,4 @@ public class AgentChatService {
         return Math.max(1, text.length() / CHARS_PER_TOKEN);
     }
 }
+

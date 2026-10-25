@@ -50,9 +50,20 @@ public interface SysUserMapper {
     List<UserVO> listUsers(@Param("keyword") String keyword, @Param("roleCode") String roleCode);
 
     /**
+     * 查询可以被指派工单的内部人员。
+     *
+     * <p>只有客服、主管和管理员能作为处理人；提交人只能提交工单，
+     * 不能作为工单处理人。</p>
+     *
+     * @return 可指派用户列表
+     */
+    List<UserVO> listAssignableUsers();
+
+    /**
      * 查一个人的姓名，转派工单时要用来回显 "已转给张三"
      * @param id 用户 ID
      * @return 姓名，取不到返回 null
      */
     String getNameById(@Param("id") Long id);
 }
+

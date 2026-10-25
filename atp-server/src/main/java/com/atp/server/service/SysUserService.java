@@ -29,9 +29,17 @@ public interface SysUserService {
     UserProfileVO currentUser(Long userId);
 
     /**
-     * 查询可指派用户列表。
+     * 查询全部用户，供通用用户管理或查询使用。
      *
      * @return 用户列表
      */
     List<UserVO> listAllUsers();
+
+    /**
+     * 查询可以被指派工单的内部人员。
+     *
+     * @return 客服、主管和管理员列表
+     */
+    List<UserVO> listAssignableUsers();
 }
+

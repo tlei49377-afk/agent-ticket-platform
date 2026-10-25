@@ -36,12 +36,17 @@ langchain4j:
       api-key: ${QW-API-KEY}
       model-name: qwen-plus
       temperature: 0.3
+      # 网络瞬断时自动重试，避免直接把 500 暴露给前端
+      max-retries: 2
+      timeout: 90s
       log-requests: true
       log-responses: true
     streaming-chat-model:
       base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
       api-key: ${QW-API-KEY}
       model-name: qwen-plus
+      max-retries: 2
+      timeout: 90s
       log-requests: true
       log-responses: true
     embedding-model:
@@ -79,4 +84,5 @@ atp.agent:
   idempotent-ttl-hours: 24
   approval-expire-hours: 24
   daily-cost-limit: 5.00
+
 

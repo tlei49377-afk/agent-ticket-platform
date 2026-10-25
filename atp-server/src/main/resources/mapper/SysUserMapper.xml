@@ -38,6 +38,20 @@
         GROUP BY u.id, u.username, u.name
     </select>
 
+    <select id="listAssignableUsers" resultType="com.atp.pojo.vo.sys.UserVO">
+        SELECT u.id, u.username, u.name
+        FROM sys_user u
+                 JOIN sys_user_role ur ON ur.user_id = u.id
+                 JOIN sys_role r ON r.id = ur.role_id
+        WHERE u.deleted = 0
+          AND u.status = 1
+          AND r.deleted = 0
+          AND r.status = 1
+          AND r.code IN ('agent', 'supervisor', 'admin')
+        GROUP BY u.id, u.username, u.name
+        ORDER BY u.id
+    </select>
+
     <select id="getNameById" resultType="java.lang.String">
         SELECT name FROM sys_user WHERE id = #{id} AND deleted = 0
     </select>
@@ -48,3 +62,4 @@
         WHERE id = #{id}
     </update>
 </mapper>
+

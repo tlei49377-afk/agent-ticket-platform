@@ -31,4 +31,18 @@ public class UserController {
     public Result<List<UserVO>> all() {
         return Result.success(sysUserService.listAllUsers());
     }
+
+    /**
+     * 可被指派工单的内部人员。
+     *
+     * <p>只返回客服、主管和管理员，提交人不会出现在指派候选中。</p>
+     *
+     * @return 可指派用户列表
+     */
+    @GetMapping("/assignable")
+    @RequirePermission("user:list")
+    public Result<List<UserVO>> assignable() {
+        return Result.success(sysUserService.listAssignableUsers());
+    }
 }
+

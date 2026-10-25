@@ -98,4 +98,15 @@ public class SysUserServiceImpl implements SysUserService {
     public List<UserVO> listAllUsers() {
         return sysUserMapper.listUsers(null, null);
     }
+
+    /**
+     * 查询可被指派工单的内部人员。
+     *
+     * @return 客服、主管和管理员列表
+     */
+    @Override
+    public List<UserVO> listAssignableUsers() {
+        return sysUserMapper.listAssignableUsers();
+    }
 }
+

@@ -180,6 +180,11 @@ public class TicketServiceImpl implements TicketService {
         if (assigneeName == null) {
             throw new BaseException(MessageConstant.USER_NOT_FOUND);
         }
+        // 提交人只是工单发起者，不能成为处理人。
+        // 只有客服、主管和管理员属于内部处理人员。
+        if (!userAccessService.isInternalStaff(assigneeId)) {
+            throw new BaseException("只能指派给内部客服、主管或管理员");
+        }
         ticketMapper.updateAssignee(ticketId, assigneeId);
         // 指派不改状态，但「谁把单给了谁」也要留痕，所以 from 和 to 写成同一个状态
         writeLog(ticketId, ticket.getStatus(), ticket.getStatus(), operatorId,
@@ -305,3 +310,4 @@ public class TicketServiceImpl implements TicketService {
         statusLogMapper.insert(logRow);
     }
 }
+

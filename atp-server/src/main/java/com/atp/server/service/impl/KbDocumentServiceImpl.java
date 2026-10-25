@@ -9,6 +9,7 @@ import com.atp.common.result.PageResult;
 import com.atp.pojo.entity.kb.KbChunk;
 import com.atp.pojo.entity.kb.KbDocument;
 import com.atp.pojo.query.KbDocumentPageQueryDTO;
+import com.atp.pojo.vo.kb.KbDocumentDetailVO;
 import com.atp.pojo.vo.kb.KbDocumentVO;
 import com.atp.server.properties.UploadProperties;
 import com.github.pagehelper.PageHelper;
@@ -119,6 +120,38 @@ public class KbDocumentServiceImpl implements KbDocumentService {
         List<KbDocumentVO> rows = documentMapper.page(query);
         PageInfo<KbDocumentVO> pageInfo = new PageInfo<>(rows);
         return new PageResult<>(pageInfo.getTotal(), rows);
+    }
+
+    /**
+     * 查询文档详情，包括全部分块和拼接后的完整正文。
+     *
+     * @param documentId 文档 ID
+     * @return 文档详情
+     */
+    @Override
+    public KbDocumentDetailVO detail(Long documentId) {
+        KbDocument document = documentMapper.getById(documentId);
+        if (document == null) {
+            throw new BaseException("知识库文档不存在");
+        }
+
+        List<KbChunk> chunks = chunkMapper.listByDocument(documentId);
+
+        KbDocumentDetailVO detail = new KbDocumentDetailVO();
+        detail.setId(document.getId());
+        detail.setTitle(document.getTitle());
+        detail.setDocType(document.getDocType());
+        detail.setStatus(document.getStatus());
+        detail.setChunkCount(document.getChunkCount());
+        detail.setVersion(document.getVersion());
+        detail.setErrorMsg(document.getErrorMsg());
+        detail.setCreateTime(document.getCreateTime());
+        detail.setChunks(chunks);
+        detail.setFullContent(chunks.stream()
+                .map(KbChunk::getContent)
+                .filter(StringUtils::hasText)
+                .collect(java.util.stream.Collectors.joining("\n\n")));
+        return detail;
     }
 
     /**

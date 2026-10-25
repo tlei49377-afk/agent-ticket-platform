@@ -2,6 +2,7 @@ package com.atp.agent.service;
 
 import com.atp.common.result.PageResult;
 import com.atp.pojo.query.KbDocumentPageQueryDTO;
+import com.atp.pojo.vo.kb.KbDocumentDetailVO;
 import com.atp.pojo.vo.kb.KbDocumentVO;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,6 +38,14 @@ public interface KbDocumentService {
      * @return 文档分页结果
      */
     PageResult<KbDocumentVO> page(KbDocumentPageQueryDTO query);
+
+    /**
+     * 查询文档详情，包括元数据、全部分块和拼接后的完整正文。
+     *
+     * @param documentId 文档 ID
+     * @return 文档详情
+     */
+    KbDocumentDetailVO detail(Long documentId);
 
     /**
      * 删除文档、分块和对应向量。
