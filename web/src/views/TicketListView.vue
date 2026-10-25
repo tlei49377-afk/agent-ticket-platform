@@ -120,7 +120,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Plus, RefreshLeft, Search } from '@element-plus/icons-vue'
 import { categoryFlat, createTicket, listTickets } from '../api/ticket'
-import { listAllUsers } from '../api/user'
+import { listAssignableUsers } from '../api/user'
 import { useUserStore } from '../store/user'
 import { priorityOf, priorityOptions, statusOf, statusOptions } from '../utils/dict'
 import { formatDateTime, formatRemain } from '../utils/format'
@@ -174,7 +174,7 @@ async function loadRefs() {
   // 这两个接口分别要 user:list 和工单相关权限，拿不到就静默降级，不影响列表本身
   if (store.can('user:list')) {
     try {
-      users.value = await listAllUsers()
+      users.value = await listAssignableUsers()
     } catch (e) {
       users.value = []
     }
@@ -266,7 +266,6 @@ async function submitCreate() {
   font-weight: 600;
 }
 </style>
-
 
 
 

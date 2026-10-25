@@ -41,7 +41,7 @@ const routes = [
         path: 'kb',
         name: 'kb',
         component: () => import('../views/KbView.vue'),
-        meta: { title: '知识库检索', icon: 'Collection', perm: 'kb:read' }
+        meta: { title: '知识库', icon: 'Collection', perm: 'kb:read' }
       }
     ]
   },
@@ -73,5 +73,4 @@ router.beforeEach((to) => {
 })
 
 export default router
-
 

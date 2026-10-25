@@ -157,7 +157,7 @@ import {
   getTicketHistory,
   replyTicket
 } from '../api/ticket'
-import { listAllUsers } from '../api/user'
+import { listAssignableUsers } from '../api/user'
 import { useUserStore } from '../store/user'
 import { priorityOf, priorityOptions, statusOf } from '../utils/dict'
 import { formatDateTime } from '../utils/format'
@@ -201,7 +201,7 @@ onMounted(async () => {
   await load()
   if (store.can('ticket:assign')) {
     try {
-      users.value = await listAllUsers()
+      users.value = await listAssignableUsers()
     } catch (e) {
       users.value = []
     }
@@ -403,6 +403,5 @@ async function submitReply() {
 .atp-his-reason { font-size: 12px; color: var(--atp-text-weak); line-height: 18px; }
 .atp-his-op { font-size: 11.5px; color: var(--atp-text-mute); }
 </style>
-
 
 
